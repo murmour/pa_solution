@@ -1,0 +1,31 @@
+OASISFormat: 0.3
+OCamlVersion: >= 3.12
+Name: solution
+Version: 0.3
+Synopsis: A helper library for solving programming contest problems
+Authors: Max Mouratov
+License: LGPL-2.1 with OCaml linking exception
+LicenseFile: LICENSE.txt
+Plugins: StdFiles (0.2), META (0.2)
+XStdFilesREADME: false
+XStdFilesAUTHORS: false
+BuildTools: ocamlbuild
+Homepage: https://bitbucket.org/cakeplus/solution
+
+Description:
+  Solution is a helper library for solving programming contest problems,
+  which is suitable for competitions like Google Code Jam and Facebook Hacker Cup.
+
+Library solution
+  Path: src
+  Modules: Solution
+  FindlibName: solution
+  BuildDepends: camlp4.lib, camlp4.extend, camlp4.quotations
+  CompiledObject: byte
+  XMETAType: syntax
+  XMETARequires: camlp4
+
+SourceRepository this
+  Type: hg
+  Location: https://bitbucket.org/cakeplus/solution
+  Tag: 0.3
