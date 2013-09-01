@@ -33,7 +33,7 @@ type spec =
   | List  of (Ast.expr * spec)          (* list[expr] of spec *)
   | Array of (Ast.expr * spec)          (* array[expr] of spec *)
   | Pair  of (spec * spec)              (* (spec * spec) *)
-  | Let   of (string * spec * spec)     (* let string = spec in spec *)
+  | Let   of (Ast.patt * spec * spec)   (* let patt = spec in spec *)
   | Expr  of Ast.expr
 
 
@@ -78,9 +78,9 @@ let rec compile_reader (s: spec) : Ast.expr =
           let $lid:(id2)$ = $(compile_reader r2)$ in
           ($lid:(id1)$, $lid:(id2)$) >>
 
-    | Let (let_id, r1, r2) ->
+    | Let (patt, r1, r2) ->
         <:expr<
-          let $lid:(let_id)$ = $(compile_reader r1)$ in
+          let $(patt)$ = $(compile_reader r1)$ in
           $(compile_reader r2)$ >>
 
     | Expr v -> v
@@ -146,8 +146,8 @@ let gen_mainloop (sol: Ast.expr) : Ast.str_item =
 
 let compile_solution in_spec out_spec (body: Ast.expr) : Ast.str_item =
   gen_mainloop
-    (List.fold_right (fun (id, spec) acc ->
-       <:expr< let $lid:(id)$ = $(compile_reader spec)$ in $(acc)$ >>)
+    (List.fold_right (fun (patt, spec) acc ->
+       <:expr< let $(patt)$ = $(compile_reader spec)$ in $(acc)$ >>)
        in_spec
        (compile_writer out_spec body))
 
@@ -159,7 +159,7 @@ EXTEND Gram
   GLOBAL: expr comma_expr str_item;
 
   let_binding: [
-    [ id = a_LIDENT; ":"; t = typ -> (id, t) ]
+    [ patt = ipatt; ":"; t = typ -> (patt, t) ]
   ];
 
   typ: [
@@ -174,7 +174,7 @@ EXTEND Gram
             failwith (Printf.sprintf "Unknown type: %s" id))
 
     | "let"; binds = LIST1 let_binding SEP ","; "in"; t_in = typ ->
-        List.fold_right (fun (id, t) acc -> Let (id, t, acc)) binds t_in
+        List.fold_right (fun (patt, t) acc -> Let (patt, t, acc)) binds t_in
 
     | id = a_LIDENT ->
         (match id with
@@ -193,8 +193,8 @@ EXTEND Gram
   ];
 
   input: [
-    [ "("; id = a_LIDENT; ":"; typ = typ; ")" ->
-        (id, typ) ]
+    [ "("; patt = ipatt; ":"; typ = typ; ")" ->
+        (patt, typ) ]
   ];
 
   str_item: LEVEL "top" [
