@@ -32,7 +32,7 @@ type spec =
   | Empty
   | List  of (Ast.expr * spec)          (* list[expr] of spec *)
   | Array of (Ast.expr * spec)          (* array[expr] of spec *)
-  | Pair  of (spec * spec)              (* (spec * spec) *)
+  | Tuple of spec list                  (* (spec, spec, ...) *)
   | Let   of (Ast.patt * spec * spec)   (* let patt = spec in spec *)
   | Expr  of Ast.expr
 
@@ -64,24 +64,28 @@ let rec compile_reader (s: spec) : Ast.expr =
     | Empty ->
         <:expr< try $(compile_reader Line)$ with _ -> "" >>
 
-    | List (size, r) ->
-        <:expr< BatList.init $(size)$ (fun _ -> $(compile_reader r)$) >>
+    | List (size, s) ->
+        <:expr< BatList.init $(size)$ (fun _ -> $(compile_reader s)$) >>
 
-    | Array (size, r) ->
-        <:expr< BatArray.init $(size)$ (fun _ -> $(compile_reader r)$) >>
+    | Array (size, s) ->
+        <:expr< BatArray.init $(size)$ (fun _ -> $(compile_reader s)$) >>
 
-    | Pair (r1, r2) ->
-        let id1 = gensym () in
-        let id2 = gensym () in
+    | Tuple specs ->
+        let l = specs |> List.map (fun s -> (gensym (), s)) in
+
+        let rec build = function
+          | (id, s) :: xs ->
+              <:expr< let $lid:(id)$ = $(compile_reader s)$ in $(build xs)$ >>
+          | [] ->
+              let es = l |> List.map (fun (id, r) -> <:expr< $lid:(id)$ >>) in
+              <:expr< $tup:(Ast.exCom_of_list es)$ >>
+
+        in build l
+
+    | Let (patt, s1, s2) ->
         <:expr<
-          let $lid:(id1)$ = $(compile_reader r1)$ in
-          let $lid:(id2)$ = $(compile_reader r2)$ in
-          ($lid:(id1)$, $lid:(id2)$) >>
-
-    | Let (patt, r1, r2) ->
-        <:expr<
-          let $(patt)$ = $(compile_reader r1)$ in
-          $(compile_reader r2)$ >>
+          let $(patt)$ = $(compile_reader s1)$ in
+          $(compile_reader s2)$ >>
 
     | Expr v -> v
 
@@ -101,25 +105,28 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
     | Line   -> print v "%s\n"
     | Empty  -> print v "\n"
 
-    | List (size, r) ->
+    | List (size, s) ->
         let id = gensym () in
-        let writer = compile_writer r <:expr< $lid:(id)$ >> in
+        let writer = compile_writer s <:expr< $lid:(id)$ >> in
         <:expr< BatList.iter (fun $lid:(id)$ -> $(writer)$) $(v)$ >>
 
-    | Array (size, r) ->
+    | Array (size, s) ->
         let id = gensym () in
-        let writer = compile_writer r <:expr< $lid:(id)$ >> in
+        let writer = compile_writer s <:expr< $lid:(id)$ >> in
         <:expr< BatArray.iter (fun $lid:(id)$ -> $(writer)$) $(v)$ >>
 
-    | Pair (r1, r2) ->
-        let a = gensym () in
-        let b = gensym () in
-        <:expr< let ($lid:(a)$, $lid:(b)$) = $(v)$ in
-                do { $(compile_writer r1 <:expr< $lid:(a)$ >>)$;
-                     $(compile_writer r2 <:expr< $lid:(b)$ >>)$ } >>
+    | Tuple specs ->
+        let l = specs |> List.map (fun r -> (gensym (), r)) in
+        let ps = l |> List.map (fun (id, r) -> <:patt< $lid:(id)$ >>) in
+        <:expr<
+          let $tup:(Ast.paCom_of_list ps)$ = $(v)$ in
+          do { $(l |> List.map (fun (id, r) ->
+                        compile_writer r <:expr< $lid:(id)$ >>)
+                   |> Ast.exSem_of_list)$ }
+        >>
 
-    | Let (let_id, r1, r2) ->
-        compile_writer r2 v
+    | Let (let_id, s1, s2) ->
+        compile_writer s2 v
 
     | Expr _ -> v
 
@@ -127,7 +134,14 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
 (* The compiler
    -------------------------------------------------------------------------- *)
 
-let gen_mainloop (sol: Ast.expr) : Ast.str_item =
+let compile_solution in_spec out_spec (body: Ast.expr) : Ast.str_item =
+
+  let rec wrap_body = function
+    | (patt, spec) :: xs ->
+        <:expr< let $(patt)$ = $(compile_reader spec)$ in $(wrap_body xs)$ >>
+    | [] ->
+        compile_writer out_spec body in
+
   <:str_item<
     let file = Sys.argv.(1) in
     BatFile.with_file_in ~mode:[`text] (file ^ ".in") (fun in_ch ->
@@ -138,18 +152,11 @@ let gen_mainloop (sol: Ast.expr) : Ast.str_item =
           for _i = 1 to (Scanf.bscanf in_buf "%d " identity) do
             Printf.printf "Solving case %d\n%!" _i;
             Printf.bprintf out_buf "%s " (Printf.sprintf "Case #%d:" _i);
-            $(sol)$;
+            $(wrap_body in_spec)$;
             Printf.bprintf out_buf "\n"
           done;
           BatIO.nwrite out_ch (Buffer.contents out_buf) }))
   >>
-
-let compile_solution in_spec out_spec (body: Ast.expr) : Ast.str_item =
-  gen_mainloop
-    (List.fold_right (fun (patt, spec) acc ->
-       <:expr< let $(patt)$ = $(compile_reader spec)$ in $(acc)$ >>)
-       in_spec
-       (compile_writer out_spec body))
 
 
 (* Syntax extension
@@ -164,17 +171,20 @@ EXTEND Gram
 
   typ: [
     [ id = a_LIDENT; "["; idx = comma_expr; "]"; "of"; t = typ ->
-      let idx = Ast.list_of_expr idx [] in
+      let specs = Ast.list_of_expr idx [] in
       (match id with
         | "list" ->
-            List.fold_right (fun idx acc -> List (idx, acc)) idx t
+            List.fold_right (fun idx acc -> List (idx, acc)) specs t
         | "array" ->
-            List.fold_right (fun idx acc -> Array (idx, acc)) idx t
+            List.fold_right (fun idx acc -> Array (idx, acc)) specs t
         | _ ->
             failwith (Printf.sprintf "Unknown type: %s" id))
 
-    | "let"; binds = LIST1 let_binding SEP ","; "in"; t_in = typ ->
-        List.fold_right (fun (patt, t) acc -> Let (patt, t, acc)) binds t_in
+    | "tuple"; "("; types = LIST0 typ SEP ","; ")" ->
+        Tuple types
+
+    | "let"; binds = LIST1 let_binding SEP ","; "in"; t = typ ->
+        List.fold_right (fun (patt, t) a -> Let (patt, t, a)) binds t
 
     | id = a_LIDENT ->
         (match id with
@@ -185,9 +195,6 @@ EXTEND Gram
           | "line"   -> Line
           | "empty"  -> Empty
           | id       -> Expr <:expr< $lid:(id)$ >>)
-
-    | "("; t1 = typ; "*"; t2 = typ; ")" ->
-        Pair (t1, t2)
 
     | e = expr -> Expr e ]
   ];
