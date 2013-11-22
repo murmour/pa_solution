@@ -163,7 +163,7 @@ let compile_solution in_spec out_spec (body: Ast.expr) : Ast.str_item =
    -------------------------------------------------------------------------- *)
 
 EXTEND Gram
-  GLOBAL: expr comma_expr str_item;
+  GLOBAL: expr comma_expr comma_ipatt str_item;
 
   let_binding: [
     [ patt = ipatt; ":"; t = typ -> (patt, t) ]
@@ -200,13 +200,17 @@ EXTEND Gram
   ];
 
   input: [
-    [ "("; patt = ipatt; ":"; typ = typ; ")" ->
-        (patt, typ) ]
+    [ "("; patt_list = comma_ipatt; ":"; typ = typ; ")" ->
+        match patt_list with
+          | <:patt< ($tup:patt_list$) >> ->
+              Ast.list_of_patt patt_list [] |> List.map (fun p -> (p, typ))
+          | _ ->
+              [ (patt_list, typ) ] ]
   ];
 
   str_item: LEVEL "top" [
-    [ "Solution"; inputs = LIST0 input; ":"; output = typ; "="; body = expr ->
-        compile_solution inputs output body ]
+    [ "Solution"; input = LIST0 input; ":"; output = typ; "="; body = expr ->
+        compile_solution (List.concat input) output body ]
   ];
 
 END
