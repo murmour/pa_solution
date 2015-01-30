@@ -1,7 +1,7 @@
 
 (* Pa_solution, a helper library for solving programming contest problems
    -----------------------------------------------------------------------------
-   Copyright (C) 2013, Max Mouratov (mmouratov(_)gmail.com)
+   Copyright (C) 2013-2015, Max Mouratov (mmouratov(_)gmail.com)
 
    License:
      This library is free software; you can redistribute it and/or
@@ -18,10 +18,7 @@
 
 
 open Camlp4.PreCast
-open Syntax
 
-
-let _loc = Loc.ghost
 
 type spec =
   | Int
@@ -30,25 +27,34 @@ type spec =
   | String
   | Line
   | Empty
-  | List  of (Ast.expr * spec)          (* list[expr] of spec *)
-  | Array of (Ast.expr * spec)          (* array[expr] of spec *)
-  | Tuple of spec list                  (* (spec, spec, ...) *)
-  | Let   of (Ast.patt * spec * spec)   (* let patt = spec in spec *)
-  | Expr  of Ast.expr
+  | List of Ast.expr * spec         (* list[expr] of spec *)
+  | Array of Ast.expr * spec        (* array[expr] of spec *)
+  | Tuple of spec list              (* (spec, spec, ...) *)
+  | Let of Ast.patt * spec * spec   (* let patt = spec in spec *)
+  | Expr of Ast.expr
 
 
 (* Code generation utilities
    -------------------------------------------------------------------------- *)
 
+let _loc = Loc.ghost
+
 let gensym =
   let id = ref 0 in
   fun () ->
     incr id;
-    Printf.sprintf "_%d" !id
+    Printf.sprintf "_#%d" !id
+
+let identity =
+  let x = gensym () in
+  <:expr< fun $lid:(x)$ -> $lid:(x)$ >>
 
 
 (* Reader
    -------------------------------------------------------------------------- *)
+
+let in_ch =
+  gensym ()
 
 let scan format =
   <:expr< Scanf.bscanf in_buf $str:(format)$ (fun _x_ -> _x_) >>
@@ -72,26 +78,29 @@ let rec compile_reader (s: spec) : Ast.expr =
 
     | Tuple specs ->
         let l = specs |> List.map (fun s -> (gensym (), s)) in
-
         let rec build = function
           | (id, s) :: xs ->
               <:expr< let $lid:(id)$ = $(compile_reader s)$ in $(build xs)$ >>
           | [] ->
               let es = l |> List.map (fun (id, r) -> <:expr< $lid:(id)$ >>) in
               <:expr< $tup:(Ast.exCom_of_list es)$ >>
-
-        in build l
+        in
+        build l
 
     | Let (patt, s1, s2) ->
         <:expr<
           let $(patt)$ = $(compile_reader s1)$ in
-          $(compile_reader s2)$ >>
+          $(compile_reader s2)$
+        >>
 
     | Expr v -> v
 
 
 (* Writer
    -------------------------------------------------------------------------- *)
+
+let out_ch =
+  gensym ()
 
 let print (v: Ast.expr) format =
   <:expr< Printf.bprintf out_buf $str:(format)$ $(v)$ >>
@@ -117,12 +126,17 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
 
     | Tuple specs ->
         let l = specs |> List.map (fun r -> (gensym (), r)) in
-        let ps = l |> List.map (fun (id, r) -> <:patt< $lid:(id)$ >>) in
+        let item_patts =
+          l |> List.map (fun (id, r) ->
+            <:patt< $lid:(id)$ >>)
+        in
+        let item_writers =
+          l |> List.map (fun (id, r) ->
+            compile_writer r <:expr< $lid:(id)$ >>)
+        in
         <:expr<
-          let $tup:(Ast.paCom_of_list ps)$ = $(v)$ in
-          do { $(l |> List.map (fun (id, r) ->
-                        compile_writer r <:expr< $lid:(id)$ >>)
-                   |> Ast.exSem_of_list)$ }
+          let $tup:(Ast.paCom_of_list item_patts)$ = $(v)$ in
+          do { $(Ast.exSem_of_list item_writers)$ }
         >>
 
     | Let (let_id, s1, s2) ->
@@ -138,9 +152,13 @@ let compile_solution in_spec out_spec (body: Ast.expr) : Ast.str_item =
 
   let rec wrap_body = function
     | (patt, spec) :: xs ->
-        <:expr< let $(patt)$ = $(compile_reader spec)$ in $(wrap_body xs)$ >>
+        <:expr<
+          let $(patt)$ = $(compile_reader spec)$ in
+          $(wrap_body xs)$
+        >>
     | [] ->
-        compile_writer out_spec body in
+        compile_writer out_spec body
+  in
 
   <:str_item<
     let file = Sys.argv.(1) in
@@ -162,55 +180,67 @@ let compile_solution in_spec out_spec (body: Ast.expr) : Ast.str_item =
 (* Syntax extension
    -------------------------------------------------------------------------- *)
 
+open Syntax
+
+
 EXTEND Gram
   GLOBAL: expr comma_expr comma_ipatt str_item;
 
   let_binding: [
-    [ patt = ipatt; ":"; t = typ -> (patt, t) ]
+    [
+      patt = ipatt; ":"; t = type_ ->
+        (patt, t)
+    ]
   ];
 
-  typ: [
-    [ id = a_LIDENT; "["; idx = comma_expr; "]"; "of"; t = typ ->
-      let specs = Ast.list_of_expr idx [] in
-      (match id with
-        | "list" ->
-            List.fold_right (fun idx acc -> List (idx, acc)) specs t
-        | "array" ->
-            List.fold_right (fun idx acc -> Array (idx, acc)) specs t
-        | _ ->
-            failwith (Printf.sprintf "Unknown type: %s" id))
+  type_: [
+    [
+        id = a_LIDENT; "["; idx = comma_expr; "]"; "of"; t = type_ ->
+          let specs = Ast.list_of_expr idx [] in
+          (match id with
+            | "list" ->
+                List.fold_right (fun idx acc -> List (idx, acc)) specs t
+            | "array" ->
+                List.fold_right (fun idx acc -> Array (idx, acc)) specs t
+            | _ ->
+                failwith (Printf.sprintf "Unknown type: %s" id))
 
-    | "tuple"; "("; types = LIST0 typ SEP ","; ")" ->
-        Tuple types
+      | "tuple"; "("; type_list = LIST0 type_ SEP ","; ")" ->
+          Tuple type_list
 
-    | "let"; binds = LIST1 let_binding SEP ","; "in"; t = typ ->
-        List.fold_right (fun (patt, t) a -> Let (patt, t, a)) binds t
+      | "let"; binds = LIST1 let_binding SEP ","; "in"; t = type_ ->
+          List.fold_right (fun (patt, t) a -> Let (patt, t, a)) binds t
 
-    | id = a_LIDENT ->
-        (match id with
-          | "int"    -> Int
-          | "int64"  -> Int64
-          | "float"  -> Float
-          | "string" -> String
-          | "line"   -> Line
-          | "empty"  -> Empty
-          | id       -> Expr <:expr< $lid:(id)$ >>)
+      | id = a_LIDENT ->
+          (match id with
+            | "int"    -> Int
+            | "int64"  -> Int64
+            | "float"  -> Float
+            | "string" -> String
+            | "line"   -> Line
+            | "empty"  -> Empty
+            | id       -> Expr <:expr< $lid:(id)$ >>)
 
-    | e = expr -> Expr e ]
+      | e = expr -> Expr e
+    ]
   ];
 
   input: [
-    [ "("; patt_list = comma_ipatt; ":"; typ = typ; ")" ->
+    [
+      "("; patt_list = comma_ipatt; ":"; type_ = type_; ")" ->
         match patt_list with
-          | <:patt< ($tup:patt_list$) >> ->
-              Ast.list_of_patt patt_list [] |> List.map (fun p -> (p, typ))
+          | <:patt< ($tup:(patt_list)$) >> ->
+              Ast.list_of_patt patt_list [] |> List.map (fun p -> (p, type_))
           | _ ->
-              [ (patt_list, typ) ] ]
+              [ (patt_list, type_) ]
+    ]
   ];
 
   str_item: LEVEL "top" [
-    [ "Solution"; input = LIST0 input; ":"; output = typ; "="; body = expr ->
-        compile_solution (List.concat input) output body ]
+    [
+      "Solution"; input = LIST0 input; ":"; output = type_; "="; body = expr ->
+        compile_solution (List.concat input) output body
+    ]
   ];
 
 END
