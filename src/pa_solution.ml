@@ -57,7 +57,7 @@ let in_ch =
   gensym ()
 
 let scan format =
-  <:expr< Scanf.bscanf in_buf $str:(format)$ (fun _x_ -> _x_) >>
+  <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(format)$ $(identity)$ >>
 
 let rec compile_reader (s: spec) : Ast.expr =
   match s with
@@ -71,16 +71,19 @@ let rec compile_reader (s: spec) : Ast.expr =
         <:expr< try $(compile_reader Line)$ with _ -> "" >>
 
     | List (size, s) ->
-        <:expr< BatList.init $(size)$ (fun _ -> $(compile_reader s)$) >>
+        <:expr< Q.Array.to_list $(compile_reader (Array (size, s)))$ >>
 
     | Array (size, s) ->
-        <:expr< BatArray.init $(size)$ (fun _ -> $(compile_reader s)$) >>
+        <:expr< Q.Array.init $(size)$ (fun _ -> $(compile_reader s)$) >>
 
     | Tuple specs ->
         let l = specs |> List.map (fun s -> (gensym (), s)) in
         let rec build = function
           | (id, s) :: xs ->
-              <:expr< let $lid:(id)$ = $(compile_reader s)$ in $(build xs)$ >>
+              <:expr<
+                let $lid:(id)$ = $(compile_reader s)$ in
+                $(build xs)$
+              >>
           | [] ->
               let es = l |> List.map (fun (id, r) -> <:expr< $lid:(id)$ >>) in
               <:expr< $tup:(Ast.exCom_of_list es)$ >>
@@ -103,7 +106,7 @@ let out_ch =
   gensym ()
 
 let print (v: Ast.expr) format =
-  <:expr< Printf.bprintf out_buf $str:(format)$ $(v)$ >>
+  <:expr< Q.Printf.fprintf $lid:(out_ch)$ $str:(format)$ $(v)$ >>
 
 let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
   match s with
@@ -117,12 +120,12 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
     | List (size, s) ->
         let id = gensym () in
         let writer = compile_writer s <:expr< $lid:(id)$ >> in
-        <:expr< BatList.iter (fun $lid:(id)$ -> $(writer)$) $(v)$ >>
+        <:expr< Q.List.iter (fun $lid:(id)$ -> $(writer)$) $(v)$ >>
 
     | Array (size, s) ->
         let id = gensym () in
         let writer = compile_writer s <:expr< $lid:(id)$ >> in
-        <:expr< BatArray.iter (fun $lid:(id)$ -> $(writer)$) $(v)$ >>
+        <:expr< Q.Array.iter (fun $lid:(id)$ -> $(writer)$) $(v)$ >>
 
     | Tuple specs ->
         let l = specs |> List.map (fun r -> (gensym (), r)) in
@@ -161,19 +164,16 @@ let compile_solution in_spec out_spec (body: Ast.expr) : Ast.str_item =
   in
 
   <:str_item<
-    let file = Sys.argv.(1) in
-    BatFile.with_file_in ~mode:[`text] (file ^ ".in") (fun in_ch ->
-      BatFile.with_file_out ~mode:[`create] (file ^ ".out") (fun out_ch ->
-        let in_buf = Scanf.Scanning.from_string (BatIO.read_all in_ch) in
-        let out_buf = Buffer.create 1024 in
-        do {
-          for _i = 1 to (Scanf.bscanf in_buf "%d " identity) do
-            Printf.printf "Solving case %d\n%!" _i;
-            Printf.bprintf out_buf "%s " (Printf.sprintf "Case #%d:" _i);
-            $(wrap_body in_spec)$;
-            Printf.bprintf out_buf "\n"
-          done;
-          BatIO.nwrite out_ch (Buffer.contents out_buf) }))
+    let $lid:(in_ch)$ = Q.Scanf.Scanning.open_in (Q.Sys.argv.(1) ^ ".in") in
+    let $lid:(out_ch)$ = Q.Pervasives.open_out (Q.Sys.argv.(1) ^ ".out") in
+    do {
+      for _i = 1 to Q.Scanf.bscanf $lid:(in_ch)$ "%d " $(identity)$ do
+        Q.Printf.printf "Solving case %d\n%!" _i;
+        Q.Printf.fprintf $lid:(out_ch)$ "%s " (Q.Printf.sprintf "Case #%d:" _i);
+        $(wrap_body in_spec)$;
+        Q.Printf.fprintf $lid:(out_ch)$ "\n"
+      done;
+    }
   >>
 
 

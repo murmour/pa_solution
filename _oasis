@@ -23,7 +23,7 @@ Library pa_solution
   BuildDepends: camlp4.lib, camlp4.extend, camlp4.quotations
   CompiledObject: byte
   XMETAType: syntax
-  XMETARequires: camlp4
+  XMETARequires: camlp4, pa_qualified
 
 SourceRepository this
   Type: git
