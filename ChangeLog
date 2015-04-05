@@ -1,3 +1,13 @@
+2013-11-12  Max Mouratov  <mmouratov@gmail.com>
+
+	Version 0.4
+
+	* New: The left-hand side of the "let" construct can now be an
+	arbitrary pattern instead of an identifier.
+	* New: Proper support for N-ary tuples (the "tuple" construct).
+	* New: Grouping inputs.
+
+
 2013-05-25  Max Mouratov  <mmouratov@gmail.com>
 
 	Version 0.3 (Initial release)
