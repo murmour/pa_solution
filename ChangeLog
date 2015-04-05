@@ -1,3 +1,11 @@
+2015-04-05  Max Mouratov  <mmouratov@gmail.com>
+
+	Version 0.5
+
+	* System: The generated code no longer depends on Batteries.
+	* System: Using pa_qualified for a more robust implementation.
+
+
 2013-11-12  Max Mouratov  <mmouratov@gmail.com>
 
 	Version 0.4
