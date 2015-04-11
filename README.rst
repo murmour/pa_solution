@@ -91,7 +91,7 @@ Solution::
 .. sourcecode:: ocaml
 
   let n: int in array[n] of float
-  (* Read [n], then read an array of floats of size [n] *)
+  (* Read n, then read an array of floats of size n *)
 
 `<tuple>` reads a tuple of values:
 
