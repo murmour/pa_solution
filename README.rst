@@ -35,7 +35,7 @@ round. This could be the starting point of the implementation:
 
 Here, we have defined a solution that first reads two integers `n` and `k`, then
 reads `keys` -- an array of integers of size `n` -- and `chests` -- an array of
-(`t` * `k` * `c`) tuples where `t` and `k` are integers, and `c` is an array of
+(`t` * `k` * `c`) tuples, where `t` and `k` are integers, and `c` is an array of
 integers of size `k`.
 
 If we were implementing this IO logic by hand, that'd be a lot of stupid
