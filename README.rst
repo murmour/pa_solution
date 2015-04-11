@@ -54,9 +54,7 @@ Syntax reference
 ================
 
 Complete BNF-style grammar of the `Solution` construct, where keywords are
-quoted and `...` is a comma-separated list. `<topform>` is the entry point.
-
-Solution::
+quoted and `...` is a comma-separated list. `<topform>` is the entry point::
 
   <topform>   ::= "Solution" <input>* ":" <output> "=" <body>
   <input>     ::= "(" <patt>... ":" <type> ")"
