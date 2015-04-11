@@ -16,8 +16,8 @@
      (enclosed in the file LICENSE.txt).
 
    Description:
-     Pa_solution is a compiled DSL for generating the IO boilerplate that
-     is necessary for solving problems in programming contests such as
+     Pa_solution is a compiled DSL for generating the IO boilerplate code
+     that is necessary for solving problems in programming contests such as
      Google Code Jam and Facebook Hacker Cup.
 
      See README.rst for more information.
