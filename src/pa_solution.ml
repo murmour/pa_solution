@@ -1,7 +1,7 @@
 
-(* Pa_solution, a helper library for solving programming contest problems
+(* Pa_solution, a DSL for solving programming contest problems
    -----------------------------------------------------------------------------
-   Copyright (C) 2013-2015, Max Mouratov (mmouratov(_)gmail.com)
+   Copyright (C) 2013-2015, Max Mouratov (mmouratov@gmail.com)
 
    License:
      This library is free software; you can redistribute it and/or
@@ -14,6 +14,13 @@
 
      See the GNU Library General Public License version 2.1 for more details
      (enclosed in the file LICENSE.txt).
+
+   Description:
+     Pa_solution is a compiled DSL for generating the IO boilerplate that
+     is necessary for solving problems in programming contests such as
+     Google Code Jam and Facebook Hacker Cup.
+
+     See README.rst for more information.
 *)
 
 

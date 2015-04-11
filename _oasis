@@ -1,20 +1,22 @@
-OASISFormat: 0.3
-OCamlVersion: >= 3.12
-Name: pa_solution
-Version: 0.5
-Synopsis: A helper library for solving programming contest problems
-Authors: Max Mouratov
-License: LGPL-2.1 with OCaml linking exception
-LicenseFile: LICENSE.txt
-Plugins: StdFiles (0.2), META (0.2)
-XStdFilesREADME: false
-XStdFilesAUTHORS: false
-BuildTools: ocamlbuild
-Homepage: https://github.com/cakeplus/pa_solution
+Name             : pa_solution
+Version          : 0.5
+Synopsis         : A DSL for solving programming contest problems
+Authors          : Max Mouratov
+Maintainers      : Max Mouratov
+License          : LGPL-2.1 with OCaml linking exception
+LicenseFile      : LICENSE.txt
+Plugins          : StdFiles (0.2), META (0.2)
+XStdFilesREADME  : false
+XStdFilesAUTHORS : false
+BuildTools       : ocamlbuild, camlp4
+Homepage         : https://github.com/cakeplus/pa_solution
+OASISFormat      : 0.3
+OCamlVersion     : >= 4.01.0
 
 Description:
-  Pa_solution is a helper library for solving programming contest problems,
-  which is suitable for competitions like Google Code Jam and Facebook Hacker Cup.
+  Pa_solution is a compiled DSL for generating the IO boilerplate that
+  is necessary for solving problems in programming contests such as
+  Google Code Jam and Facebook Hacker Cup.
 
 Library pa_solution
   Path: src
