@@ -61,7 +61,7 @@ quoted and `...` is a comma-separated list. `<topform>` is the entry point::
   <output>    ::= <type>
   <body>      ::= <expr>
   <type>      ::= <prim_type> | <let> | <tuple> | <list> | <array> | <expr>
-  <prim_type> ::= "int" | "int64" | "float" | "string" | "line" | "empty"
+  <prim_type> ::= "int" | "int64" | "float" | "string" | "char" | "line" | "empty"
   <let>       ::= "let" (<patt> ":" <type>)... "in" <type>
   <tuple>     ::= "tuple" "(" <type>... ")"
   <list>      ::= "list" "[" <expr>... "]" "of" <type>
@@ -98,7 +98,7 @@ quoted and `...` is a comma-separated list. `<topform>` is the entry point::
   let n: int in list[n] of tuple(int, float)
   (* Read an n-sized list of (int * float) tuples *)
 
-`<int>`, `<int64>` and `<float>` correspond to the primitive OCaml types.
+`<int>`, `<int64>`, `<char>` and `<float>` correspond to the primitive OCaml types.
 `<string>` is a whitespace-delimited word (same as `%s` in `Scanf`).
 `<line>` is a string of arbitrary characters ending with a newline character
 (but excluding it).

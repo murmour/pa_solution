@@ -32,6 +32,7 @@ type spec =
   | Int64
   | Float
   | String
+  | Char
   | Line
   | Empty
   | List of Ast.expr * spec         (* list[expr] of spec *)
@@ -72,6 +73,7 @@ let rec compile_reader (s: spec) : Ast.expr =
     | Int64  -> scan "%Ld "
     | Float  -> scan "%f "
     | String -> scan "%s "
+    | Char   -> scan "%c "
     | Line   -> scan "%[^\n]\n"
 
     | Empty ->
@@ -121,6 +123,7 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
     | Int64  -> print v "%Ld "
     | Float  -> print v "%f "
     | String -> print v "%s "
+    | Char   -> print v "%c "
     | Line   -> print v "%s\n"
     | Empty  -> print v "\n"
 
@@ -224,6 +227,7 @@ EXTEND Gram
             | "int64"  -> Int64
             | "float"  -> Float
             | "string" -> String
+            | "char"   -> Char
             | "line"   -> Line
             | "empty"  -> Empty
             | id       -> Expr <:expr< $lid:(id)$ >>)
