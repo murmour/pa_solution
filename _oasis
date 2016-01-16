@@ -1,17 +1,17 @@
-Name             : pa_solution
-Version          : 0.5
-Synopsis         : A DSL for solving programming contest problems
-Authors          : Max Mouratov
-Maintainers      : Max Mouratov
-License          : LGPL-2.1 with OCaml linking exception
-LicenseFile      : LICENSE.txt
-Plugins          : StdFiles (0.2), META (0.2)
-XStdFilesREADME  : false
-XStdFilesAUTHORS : false
-BuildTools       : ocamlbuild, camlp4
-Homepage         : https://github.com/cakeplus/pa_solution
-OASISFormat      : 0.3
-OCamlVersion     : >= 4.01.0
+Name: pa_solution
+Version: 0.5
+Synopsis: A DSL for solving programming contest problems
+Authors: Max Mouratov
+Maintainers: Max Mouratov
+License: LGPL-2.1 with OCaml linking exception
+LicenseFile: LICENSE.txt
+Plugins: StdFiles (0.2), META (0.2)
+XStdFilesREADME: false
+XStdFilesAUTHORS: false
+BuildTools: ocamlbuild, camlp4
+Homepage: https://github.com/cakeplus/pa_solution
+OASISFormat: 0.3
+OCamlVersion: >= 4.01.0
 
 Description:
   Pa_solution is a compiled DSL for generating the IO boilerplate code

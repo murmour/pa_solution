@@ -1,7 +1,7 @@
 
 (* Pa_solution, a DSL for solving programming contest problems
    -----------------------------------------------------------------------------
-   Copyright (C) 2013-2015, Max Mouratov (mmouratov@gmail.com)
+   Copyright (C) 2013-2016, Max Mouratov (mmouratov@gmail.com)
 
    License:
      This library is free software; you can redistribute it and/or
@@ -69,12 +69,12 @@ let scan format =
 
 let rec compile_reader (s: spec) : Ast.expr =
   match s with
-    | Int    -> scan "%d "
-    | Int64  -> scan "%Ld "
-    | Float  -> scan "%f "
+    | Int -> scan "%d "
+    | Int64 -> scan "%Ld "
+    | Float -> scan "%f "
     | String -> scan "%s "
-    | Char   -> scan "%c "
-    | Line   -> scan "%[^\n]\n"
+    | Char -> scan "%c "
+    | Line -> scan "%[^\n]\n"
 
     | Empty ->
         <:expr< try $(compile_reader Line)$ with _ -> "" >>
@@ -119,13 +119,13 @@ let print (v: Ast.expr) format =
 
 let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
   match s with
-    | Int    -> print v "%d "
-    | Int64  -> print v "%Ld "
-    | Float  -> print v "%f "
+    | Int -> print v "%d "
+    | Int64 -> print v "%Ld "
+    | Float -> print v "%f "
     | String -> print v "%s "
-    | Char   -> print v "%c "
-    | Line   -> print v "%s\n"
-    | Empty  -> print v "\n"
+    | Char -> print v "%c "
+    | Line -> print v "%s\n"
+    | Empty -> print v "\n"
 
     | List (size, s) ->
         let id = gensym () in
@@ -176,14 +176,12 @@ let compile_solution in_spec out_spec (body: Ast.expr) : Ast.str_item =
   <:str_item<
     let $lid:(in_ch)$ = Q.Scanf.Scanning.open_in (Q.Sys.argv.(1) ^ ".in") in
     let $lid:(out_ch)$ = Q.Pervasives.open_out (Q.Sys.argv.(1) ^ ".out") in
-    do {
-      for _i = 1 to Q.Scanf.bscanf $lid:(in_ch)$ "%d " $(identity)$ do
-        Q.Printf.printf "Solving case %d\n%!" _i;
-        Q.Printf.fprintf $lid:(out_ch)$ "%s " (Q.Printf.sprintf "Case #%d:" _i);
-        $(wrap_body in_spec)$;
-        Q.Printf.fprintf $lid:(out_ch)$ "\n"
-      done;
-    }
+    for _i = 1 to Q.Scanf.bscanf $lid:(in_ch)$ "%d " $(identity)$ do
+      Q.Printf.printf "Solving case %d\n%!" _i;
+      Q.Printf.fprintf $lid:(out_ch)$ "Case #%d: " _i;
+      $(wrap_body in_spec)$;
+      Q.Printf.fprintf $lid:(out_ch)$ "\n"
+    done
   >>
 
 
@@ -223,14 +221,14 @@ EXTEND Gram
 
       | id = a_LIDENT ->
           (match id with
-            | "int"    -> Int
-            | "int64"  -> Int64
-            | "float"  -> Float
+            | "int" -> Int
+            | "int64" -> Int64
+            | "float" -> Float
             | "string" -> String
-            | "char"   -> Char
-            | "line"   -> Line
-            | "empty"  -> Empty
-            | id       -> Expr <:expr< $lid:(id)$ >>)
+            | "char" -> Char
+            | "line" -> Line
+            | "empty" -> Empty
+            | id -> Expr <:expr< $lid:(id)$ >>)
 
       | e = expr -> Expr e
     ]

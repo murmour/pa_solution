@@ -56,18 +56,18 @@ Syntax reference
 Complete BNF-style grammar of the `Solution` construct, where keywords are
 quoted and `...` is a comma-separated list. `<topform>` is the entry point::
 
-  <topform>   ::= "Solution" <input>* ":" <output> "=" <body>
-  <input>     ::= "(" <patt>... ":" <type> ")"
-  <output>    ::= <type>
-  <body>      ::= <expr>
-  <type>      ::= <prim_type> | <let> | <tuple> | <list> | <array> | <expr>
+  <topform> ::= "Solution" <input>* ":" <output> "=" <body>
+  <input> ::= "(" <patt>... ":" <type> ")"
+  <output> ::= <type>
+  <body> ::= <expr>
+  <type> ::= <prim_type> | <let> | <tuple> | <list> | <array> | <expr>
   <prim_type> ::= "int" | "int64" | "float" | "string" | "char" | "line" | "empty"
-  <let>       ::= "let" (<patt> ":" <type>)... "in" <type>
-  <tuple>     ::= "tuple" "(" <type>... ")"
-  <list>      ::= "list" "[" <expr>... "]" "of" <type>
-  <array>     ::= "array" "[" <expr>... "]" "of" <type>
-  <expr>      ::= OCaml expression
-  <patt>      ::= OCaml pattern
+  <let> ::= "let" (<patt> ":" <type>)... "in" <type>
+  <tuple> ::= "tuple" "(" <type>... ")"
+  <list> ::= "list" "[" <expr>... "]" "of" <type>
+  <array> ::= "array" "[" <expr>... "]" "of" <type>
+  <expr> ::= OCaml expression
+  <patt> ::= OCaml pattern
 
 `<array>` allows to read several values into an OCaml array of a specified size
 (the size of each dimension is defined by an arbitrary expression). Example:
@@ -99,9 +99,11 @@ quoted and `...` is a comma-separated list. `<topform>` is the entry point::
   (* Read an n-sized list of (int * float) tuples *)
 
 `<int>`, `<int64>`, `<char>` and `<float>` correspond to the primitive OCaml types.
+
 `<string>` is a whitespace-delimited word (same as `%s` in `Scanf`).
-`<line>` is a string of arbitrary characters ending with a newline character
-(but excluding it).
+
+`<line>` is a string of arbitrary characters ending with a newline character (but excluding it).
+
 `<empty>` is a newline character.
 
 
