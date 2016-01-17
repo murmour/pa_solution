@@ -1,0 +1,10 @@
+# OASIS_START
+# DO NOT EDIT (digest: a6da5463626a8f78ff6011cc4322195f)
+version = "0.6"
+description = "A DSL for solving programming contest problems"
+requires = "camlp4 pa_qualified"
+archive(syntax, preprocessor) = "pa_solution.cma"
+archive(syntax, toploop) = "pa_solution.cma"
+exists_if = "pa_solution.cma"
+# OASIS_STOP
+
