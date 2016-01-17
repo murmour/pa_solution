@@ -1,3 +1,12 @@
+2016-01-18  Max Mouratov  <mmouratov@gmail.com>
+
+	Version 0.6
+
+	* Fix: Printing "empty" was broken.
+	* Fix: "empty" now corresponds to type "unit" (instead of string).
+	* Fix: Printing an "array of line" resulted in redundant EOLs.
+
+
 2015-04-05  Max Mouratov  <mmouratov@gmail.com>
 
 	Version 0.5
