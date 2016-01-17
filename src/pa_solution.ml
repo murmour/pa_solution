@@ -137,6 +137,18 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
         let writer = compile_writer s <:expr< $lid:(id)$ >> in
         <:expr< Q.List.iter (fun $lid:(id)$ -> $(writer)$) $(v)$ >>
 
+    | Array (size, Line) ->
+        let id = gensym () in
+        <:expr<
+          for $lid:(id)$ = 0 to Array.length $(v)$ - 1 do
+            if $lid:(id)$ = 0 then
+              $(print_endline)$ else ();
+            $(compile_writer String <:expr< $(v)$.($lid:(id)$) >>)$;
+            if $lid:(id)$ < Array.length $(v)$ - 1 then
+              $(print_endline)$ else ()
+          done
+        >>
+
     | Array (size, s) ->
         let id = gensym () in
         let writer = compile_writer s <:expr< $lid:(id)$ >> in
