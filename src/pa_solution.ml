@@ -77,7 +77,7 @@ let rec compile_reader (s: spec) : Ast.expr =
     | Line -> scan "%[^\n]\n"
 
     | Empty ->
-        <:expr< try $(compile_reader Line)$ with _ -> "" >>
+        <:expr< try let _ = $(compile_reader Line)$ in () with _ -> () >>
 
     | List (size, s) ->
         <:expr< Q.Array.to_list $(compile_reader (Array (size, s)))$ >>
@@ -117,6 +117,9 @@ let out_ch =
 let print (v: Ast.expr) format =
   <:expr< Q.Printf.fprintf $lid:(out_ch)$ $str:(format)$ $(v)$ >>
 
+let print_endline =
+  <:expr< Q.Printf.fprintf $lid:(out_ch)$ "\n" >>
+
 let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
   match s with
     | Int -> print v "%d "
@@ -125,7 +128,9 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
     | String -> print v "%s "
     | Char -> print v "%c "
     | Line -> print v "%s\n"
-    | Empty -> print v "\n"
+
+    | Empty ->
+        <:expr< let () = $(v)$ in $(print_endline)$ >>
 
     | List (size, s) ->
         let id = gensym () in

@@ -104,7 +104,7 @@ quoted and `...` is a comma-separated list. `<topform>` is the entry point::
 
 `<line>` is a string of arbitrary characters ending with a newline character (but excluding it).
 
-`<empty>` is a newline character.
+`<empty>` is a newline character (corresponds to type `unit`).
 
 
 .. _`problem D`: https://code.google.com/codejam/contest/2270488/dashboard#s=p3
