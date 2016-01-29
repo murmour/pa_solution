@@ -40,6 +40,7 @@ type spec =
   | Tuple of spec list              (* (spec, spec, ...) *)
   | Let of Ast.patt * spec * spec   (* let patt = spec in spec *)
   | Expr of Ast.expr
+  | Format of string * int          (* format string * number of holes *)
 
 
 (* Code generation utilities
@@ -64,17 +65,20 @@ let identity =
 let in_ch =
   gensym ()
 
-let scan format =
-  <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(format)$ $(identity)$ >>
-
 let rec compile_reader (s: spec) : Ast.expr =
   match s with
-    | Int -> scan "%d "
-    | Int64 -> scan "%Ld "
-    | Float -> scan "%f "
-    | String -> scan "%s "
-    | Char -> scan "%c "
-    | Line -> scan "%[^\n]\n"
+    | Int ->
+        compile_reader (Format ("%d ", 1))
+    | Int64 ->
+        compile_reader (Format ("%Ld ", 1))
+    | Float ->
+        compile_reader (Format ("%f ", 1))
+    | String ->
+        compile_reader (Format ("%s ", 1))
+    | Char ->
+        compile_reader (Format ("%c ", 1))
+    | Line ->
+        compile_reader (Format ("%[^\n]\n", 1))
 
     | Empty ->
         <:expr< try let _ = $(compile_reader Line)$ in () with _ -> () >>
@@ -107,6 +111,23 @@ let rec compile_reader (s: spec) : Ast.expr =
 
     | Expr v -> v
 
+    | Format (spec, 0) ->
+        <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(spec)$ >>
+    | Format (spec, 1) ->
+        <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(spec)$ $(identity)$ >>
+    | Format (spec, holes) ->
+        let ids = Array.to_list @@ Array.init holes (fun i -> gensym ()) in
+        let args = ids |> List.map (fun id -> <:expr< $lid:(id)$ >>) in
+        let body = <:expr< $tup:(Ast.exCom_of_list args)$ >> in
+        let rec build_fn ids =
+          match ids with
+            | [] ->
+                body
+            | x :: xs ->
+                <:expr< fun $lid:(x)$ -> $(build_fn xs)$ >>
+        in
+        <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(spec)$ $(build_fn ids)$ >>
+
 
 (* Writer
    -------------------------------------------------------------------------- *)
@@ -114,20 +135,23 @@ let rec compile_reader (s: spec) : Ast.expr =
 let out_ch =
   gensym ()
 
-let print (v: Ast.expr) format =
-  <:expr< Q.Printf.fprintf $lid:(out_ch)$ $str:(format)$ $(v)$ >>
-
 let print_endline =
   <:expr< Q.Printf.fprintf $lid:(out_ch)$ "\n" >>
 
 let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
   match s with
-    | Int -> print v "%d "
-    | Int64 -> print v "%Ld "
-    | Float -> print v "%f "
-    | String -> print v "%s "
-    | Char -> print v "%c "
-    | Line -> print v "%s\n"
+    | Int ->
+        compile_writer (Format ("%d ", 1)) v
+    | Int64 ->
+        compile_writer (Format ("%Ld ", 1)) v
+    | Float ->
+        compile_writer (Format ("%f ", 1)) v
+    | String ->
+        compile_writer (Format ("%s ", 1)) v
+    | Char ->
+        compile_writer (Format ("%c ", 1)) v
+    | Line ->
+        compile_writer (Format ("%s\n", 1)) v
 
     | Empty ->
         <:expr< let () = $(v)$ in $(print_endline)$ >>
@@ -173,6 +197,26 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
         compile_writer s2 v
 
     | Expr _ -> v
+
+    | Format (spec, 0) ->
+        <:expr< let () = $(v)$ in Q.Printf.fprintf $lid:(out_ch)$ $str:(spec)$ >>
+    | Format (spec, 1) ->
+        <:expr< Q.Printf.fprintf $lid:(out_ch)$ $str:(spec)$ $(v)$ >>
+    | Format (spec, holes) ->
+        let rec append_args head args =
+          match args with
+            | [] ->
+                head
+            | x :: xs ->
+                append_args <:expr< $(head)$ $lid:(x)$ >> xs
+        in
+        let ids = Array.to_list @@ Array.init holes (fun i -> gensym ()) in
+        let patts = ids |> List.map (fun id -> <:patt< $lid:(id)$ >>) in
+        let printer = <:expr< Q.Printf.fprintf $lid:(out_ch)$ $str:(spec)$ >> in
+        <:expr<
+          let $tup:(Ast.paCom_of_list patts)$ = $(v)$ in
+          $(append_args printer ids)$
+        >>
 
 
 (* The compiler
@@ -246,6 +290,11 @@ EXTEND Gram
             | "line" -> Line
             | "empty" -> Empty
             | id -> Expr <:expr< $lid:(id)$ >>)
+
+      | s = a_STRING ->
+          let holes = ref 0 in
+          s |> String.iter (fun c -> if c = '%' then incr holes);
+          Format (s, !holes)
 
       | e = expr -> Expr e
     ]
