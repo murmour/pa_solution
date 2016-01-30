@@ -302,12 +302,15 @@ EXTEND Gram
 
   input: [
     [
-      "("; patt_list = comma_ipatt; ":"; type_ = type_; ")" ->
-        match patt_list with
-          | <:patt< ($tup:(patt_list)$) >> ->
-              Ast.list_of_patt patt_list [] |> List.map (fun p -> (p, type_))
-          | _ ->
-              [ (patt_list, type_) ]
+        "("; patt_list = comma_ipatt; ":"; type_ = type_; ")" ->
+          (match patt_list with
+            | <:patt< ($tup:(patt_list)$) >> ->
+                Ast.list_of_patt patt_list [] |> List.map (fun p -> (p, type_))
+            | _ ->
+                [ (patt_list, type_) ]);
+
+      | type_ = type_ ->
+        [ (<:patt< _ >>, type_) ];
     ]
   ];
 
