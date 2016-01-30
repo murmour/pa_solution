@@ -4,7 +4,7 @@ open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
 
 
-Solution (n: int) (a, b: float) (stages: array[n] of float) : string =
+Solution (n: int) (a, b: float) (stages: array[n] of float) : "%.7f" =
   let expectation = ref 0.0 in
   let calc_expectation a' b' = ((b'-.a') /. (b-.a)) *. ((b'+.a') /. 2.0) in
 
@@ -20,5 +20,4 @@ Solution (n: int) (a, b: float) (stages: array[n] of float) : string =
        iter (ci+1) 0.0 (b-.c))
   in
   iter 0 a b;
-
-  Printf.sprintf "%.7f" !expectation
+  !expectation

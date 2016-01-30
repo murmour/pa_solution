@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
 
@@ -8,12 +8,10 @@ let possible (a, b, c) =
   cond a b && cond a c && cond b c
 
 let possible_triplets p n =
-  List.of_enum
-    [? (a, b, c) | a <- 0--10; b <- 0--10; c <- 0--10;
+  [? List: (a, b, c) | a <- 0--10; b <- 0--10; c <- 0--10;
      a + b + c = n;
      possible (a, b, c);
      a >= p || b >= p || c >= p ?]
-
 
 let surprising (a, b, c) =
   let cond x y = abs (x - y) = 2 in

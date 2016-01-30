@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
 
@@ -12,16 +12,13 @@ let rec process_string last ct = function
       else
         (last, ct) :: process_string x 1 xs
 
-
 let rec split_groups prev = function
   | [] -> []
   | x :: xs ->
       (x, (prev @ xs)) :: split_groups (x :: prev) xs
 
-
 let solve_group ((_, hd), rest) =
   rest |> List.map (fun (_, x) -> abs (x - hd)) |> List.sum
-
 
 let unify groups =
   split_groups [] groups |> List.map solve_group |> List.min
@@ -29,8 +26,9 @@ let unify groups =
 
 Solution (n: int) (strings: list[n] of string) : string =
   let processed =
-    strings |> List.map String.to_list
-            |> List.map (fun s -> process_string (List.hd s) 0 s)
+    strings
+    |> List.map String.to_list
+    |> List.map (fun s -> process_string (List.hd s) 0 s)
   in
 
   let rec combine l =

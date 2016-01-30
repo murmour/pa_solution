@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
@@ -15,14 +15,15 @@ Solution (n: int) (levels: list[n] of tuple(int, int)) : string =
   let size = 1000 in
   let l1 = Array.make size None in
   let l2 = Array.make size None in
-
-  levels |> List.sort (fun (_, b1) (_, b2) -> compare b2 b1)
-         |> List.iteri (fun i (a, b) ->
-              l1.(i) <- Some a;
-              l2.(i) <- Some b);
+  levels
+  |> List.sort (fun (_, b1) (_, b2) -> compare b2 b1)
+  |> List.iteri (fun i (a, b) ->
+      l1.(i) <- Some a;
+      l2.(i) <- Some b);
 
   let rec solve_iter d s =
-    if not (some_unsolved l2) then Some d
+    if not (some_unsolved l2) then
+      Some d
     else
       try
         let i = choose_s s l2 in
@@ -32,16 +33,13 @@ Solution (n: int) (levels: list[n] of tuple(int, int)) : string =
         else
           (l1.(i) <- None;
            solve_iter (d + 1) (s + 2))
-
       with Not_found ->
         try
           let i = choose_s s l1 in
           l1.(i) <- None;
           solve_iter (d + 1) (s + 1)
-
         with Not_found ->
           None
-
   in
   match (solve_iter 0 0) with
     | Some i ->

@@ -1,11 +1,10 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
 
 
 let calc_descn arr i =
   let len = Array.length arr in
-
   let rec iter n =
     let idx = i + n + 1 in
     if idx >= len then
@@ -15,12 +14,11 @@ let calc_descn arr i =
     else
       Some n
   in
-
   iter 0
 
 
 Solution (e, r, n: int) (arr: array[n] of int) : int =
-  let cre  = ref e in
+  let cre = ref e in
   let gain = ref 0 in
   for i = 0 to n-1 do
     let v =

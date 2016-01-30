@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
 
@@ -32,7 +32,6 @@ Solution (n: int) (peaks: array[n-1] of int) : string =
   in
 
   Return.label (fun lab ->
-
     peaks |> Array.iteri (fun h1 h2 ->
       for i = h1 + 1 to h2 - 1 do
         if peaks.(i) > h2 then
@@ -47,7 +46,8 @@ Solution (n: int) (peaks: array[n-1] of int) : string =
         fill_streak i stop step
     done;
 
-    sol |> Array.map Option.get
-        |> Array.map string_of_int
-        |> Array.to_list
-        |> String.concat " ")
+    sol
+    |> Array.map Option.get
+    |> Array.map string_of_int
+    |> Array.to_list
+    |> String.concat " ")

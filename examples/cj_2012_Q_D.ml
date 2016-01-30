@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
 
@@ -29,7 +29,7 @@ let slope (y1, x1) (y2, x2) =
 
 
 Solution (h, w, d: int) (map: array[h] of string) : int =
-  let h, w = h-2, w-2 in
+  let h = h-2 and w = w-2 in
   let mat = Array.make_matrix h w `Empty in
   let center = ref (0, 0) in
 
@@ -53,7 +53,6 @@ Solution (h, w, d: int) (map: array[h] of string) : int =
       (y, x) <> center;
       distance center (y, x) <= d;
       read_cell mat h w y x = `Me ?]
-
   |> Enum.map (slope center)
   |> List.of_enum
   |> List.unique

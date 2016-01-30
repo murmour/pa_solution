@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
 
@@ -23,7 +23,4 @@ Solution (n: int) (vines: list[n] of tuple(int, int)) (d: int) : string =
                 sol.(j) <- Some new_h
       done));
 
-  if sol.(len-1) <> None then
-    "YES"
-  else
-    "NO"
+  if sol.(len-1) <> None then "YES" else "NO"

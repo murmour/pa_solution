@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
@@ -6,7 +6,6 @@ open Batteries
 
 let copy_matrix arr =
   arr |> Array.map Array.copy
-
 
 let scan_input input n m =
   let arr = Array.make_matrix (n + 2) (m + 2) (-1) in
@@ -18,7 +17,6 @@ let scan_input input n m =
   done;
   arr.(1).(1) <- 1;
   arr
-
 
 let fill mat_orig n m =
   let arr = copy_matrix mat_orig in
@@ -37,7 +35,6 @@ let fill mat_orig n m =
   done;
   arr
 
-
 let rec extend_left arr i j n =
   if arr.(i).(j) < 0 then
     arr.(i).(j) <- min arr.(i).(j) (1 - n)
@@ -49,7 +46,6 @@ let rec extend_left arr i j n =
       (arr.(i+1).(j) <- n+1;
        extend_left arr i (j-1) (n+1))
 
-
 let rec extend_up arr i j n =
   if arr.(i).(j) < 0 then
     arr.(i).(j) <- min arr.(i).(j) (1 - n)
@@ -60,7 +56,6 @@ let rec extend_up arr i j n =
     else if n > arr.(i).(j) && n+1 > side then
       (arr.(i).(j+1) <- n+1;
        extend_up arr (i-1) j (n+1))
-
 
 let extend mat_orig n m =
   let arr = copy_matrix mat_orig in

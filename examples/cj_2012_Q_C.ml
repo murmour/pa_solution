@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
 
@@ -15,10 +15,11 @@ Solution (a, b: int) : int =
     r / powers.(by-1) + (tail * powers.(n-by-1))
   in
 
-  a--b |> Enum.map (fun a ->
-            [? rotate a by | by <- 1--(n-1) ?]
-              |> Enum.filter (fun c -> c > a && c <= b)
-              |> List.of_enum
-              |> List.unique
-              |> List.length)
-       |> Enum.sum
+  a--b |>
+  Enum.map (fun a ->
+      [? rotate a by | by <- 1--(n-1) ?]
+      |> Enum.filter (fun c -> c > a && c <= b)
+      |> List.of_enum
+      |> List.unique
+      |> List.length)
+  |> Enum.sum

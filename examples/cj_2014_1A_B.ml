@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
 
@@ -36,6 +36,7 @@ let build_graph edges =
 
 Solution (n: int) (edges: list[n-1] of tuple(int, int)) : int =
   let g = build_graph edges in
-  (1--n) |> Enum.map (build_tree g 0)
-         |> Enum.map solve_tree
-         |> Enum.reduce min
+  (1--n)
+  |> Enum.map (build_tree g 0)
+  |> Enum.map solve_tree
+  |> Enum.reduce min

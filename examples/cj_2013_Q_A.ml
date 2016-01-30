@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
 
@@ -11,7 +11,7 @@ let check arr fn =
     [
       any [? all [? fn arr.(i).[j] | j <- 0--3 ?] | i <- 0--3 ?];
       any [? all [? fn arr.(j).[i] | j <- 0--3 ?] | i <- 0--3 ?];
-      all [? fn arr.(i).[i]   | i <- 0--3 ?];
+      all [? fn arr.(i).[i] | i <- 0--3 ?];
       all [? fn arr.(i).[3-i] | i <- 0--3 ?];
     ]
 

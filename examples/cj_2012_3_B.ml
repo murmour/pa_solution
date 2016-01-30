@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
@@ -60,23 +60,23 @@ Solution (s, m: int) (stones: list[m] of tuple(int, int)) : string =
   let h = Hashtbl.create 1000 in
 
   let is_corner = function
-    | (1, 1)                             -> Some 0
-    | (x, 1) when x = s                  -> Some 1
-    | (1, y) when y = s                  -> Some 2
-    | (x, y) when x = bound && y = s     -> Some 3
+    | (1, 1) -> Some 0
+    | (x, 1) when x = s -> Some 1
+    | (1, y) when y = s -> Some 2
+    | (x, y) when x = bound && y = s -> Some 3
     | (x, y) when x = bound && y = bound -> Some 4
-    | (x, y) when x = s && y = bound     -> Some 5
-    | _                                  -> None
+    | (x, y) when x = s && y = bound -> Some 5
+    | _ -> None
   in
 
   let is_edge = function
-    | (1, _)                             -> Some 0
-    | (_, 1)                             -> Some 1
-    | (x, _) when x = bound              -> Some 2
-    | (_, y) when y = bound              -> Some 3
-    | (x, y) when x-y = s-1              -> Some 4
-    | (x, y) when y-x = s-1              -> Some 5
-    | _                                  -> None
+    | (1, _) -> Some 0
+    | (_, 1) -> Some 1
+    | (x, _) when x = bound -> Some 2
+    | (_, y) when y = bound -> Some 3
+    | (x, y) when x-y = s-1 -> Some 4
+    | (x, y) when y-x = s-1 -> Some 5
+    | _ -> None
   in
 
   let get_crown (x, y) =
@@ -111,7 +111,7 @@ Solution (s, m: int) (stones: list[m] of tuple(int, int)) : string =
             | None -> ());
 
     let crown = get_crown (x, y) in
-    (match List.filter_map identity crown with
+    match List.filter_map identity crown with
       | [] ->
           let idx = unique () in
           v.(x).(y) <- Some idx;
@@ -138,7 +138,7 @@ Solution (s, m: int) (stones: list[m] of tuple(int, int)) : string =
           let ring = is_ring near in
 
           if bdge || fork || ring then
-            raise (Found (move+1, bdge, fork, ring)));
+            raise (Found (move+1, bdge, fork, ring))
   in
 
   print_result

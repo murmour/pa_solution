@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
 
@@ -7,9 +7,9 @@ let dict =
   [? Array: lines | lines <- File.lines_of "garbled_email_dictionary.txt" ?]
 
 
-module Matcher (P: sig val s: string end) = struct
-
-  let len = String.length P.s
+Solution (s: line) : int =
+  let len = String.length s in
+  let dp = Array.make_matrix (len+1) 5 10000 in
 
   let matches i edge word =
     let wlen = String.length word in
@@ -18,7 +18,7 @@ module Matcher (P: sig val s: string end) = struct
       let edge = ref edge in
       Return.label (fun lab ->
         for x = 0 to wlen - 1 do
-          if P.s.[i+x] <> word.[x] then
+          if s.[i+x] <> word.[x] then
             (if !edge <= 0 then
                (incr garb; edge := 4)
              else
@@ -27,9 +27,7 @@ module Matcher (P: sig val s: string end) = struct
             decr edge
         done;
         Some ((max !edge 0), !garb))
-
-  let dp =
-    Array.make_matrix (len+1) 5 10000
+  in
 
   let rec get_matching (i, edge, garb) =
     if dp.(i).(edge) > garb then
@@ -44,11 +42,7 @@ module Matcher (P: sig val s: string end) = struct
             else
               get_matching (i, e2, g)))
       end
+  in
+  get_matching (0, 0, 0);
 
-end
-
-
-Solution (s: line) : int =
-  let module M = Matcher (struct let s = s end) in
-  M.get_matching (0, 0, 0);
-  List.min [? List: M.dp.(M.len).(i) | i <- 0--4 ?]
+  List.min [? List: dp.(len).(i) | i <- 0--4 ?]
