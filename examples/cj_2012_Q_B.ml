@@ -24,7 +24,7 @@ let has_surprsing l =
   l |> List.exists surprising
 
 
-Solution (n, s, p: int) (scores: list[n] of int) : int =
+Solution (n, s, p: "%d ") (scores: list[n] of "%d ") : "%d" =
   let gaps = ref s in
   let pipl = ref 0 in
 

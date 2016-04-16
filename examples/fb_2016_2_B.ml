@@ -4,7 +4,7 @@ open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
 
 
-Solution (n, k: int) (p: float) : "%.9f" =
+Solution (n, k: "%d ") (p: "%f ") : "%.9f" =
   if k > n then 0.0 else begin
     let dp1 = Array.make_matrix (n+1) (n+1) 0.0 in
     for n' = 0 to n do
@@ -28,8 +28,7 @@ Solution (n, k: int) (p: float) : "%.9f" =
     let dp2 = Array.make (n+1) 0.0 in
     for i = 1 to n do
       for j = 0 to i-1 do
-        if dp2.(i) < (dp2.(j) +. dp1.(i-j).(k)) then
-          dp2.(i) <- dp2.(j) +. dp1.(i-j).(k)
+        dp2.(i) <- max dp2.(i) (dp2.(j) +. dp1.(i-j).(k))
       done;
     done;
     dp2.(n)

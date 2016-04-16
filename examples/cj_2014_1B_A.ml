@@ -24,7 +24,7 @@ let unify groups =
   split_groups [] groups |> List.map solve_group |> List.min
 
 
-Solution (n: int) (strings: list[n] of string) : string =
+Solution (n: "%d ") (strings: list[n] of "%s ") : "%s" =
   let processed =
     strings
     |> List.map String.to_list

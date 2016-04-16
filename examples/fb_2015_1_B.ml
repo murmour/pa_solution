@@ -35,7 +35,7 @@ module Trie = struct
 end
 
 
-Solution (n: int) (words: array[n] of line) : int =
+Solution (n: "%d ") (words: array[n] of "%s ") : "%d" =
   let count = ref 0 in
   let trie = Trie.create () in
   for i = 0 to n-1 do

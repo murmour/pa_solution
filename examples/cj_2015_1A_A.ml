@@ -33,5 +33,5 @@ let solve2 n plates =
   |> List.min
 
 
-Solution (n: int) (plates: array[n] of int) : tuple(int, int) =
+Solution (n: "%d ") (plates: array[n] of "%d ") : "%d %d" =
   (solve1 n plates, solve2 n plates)

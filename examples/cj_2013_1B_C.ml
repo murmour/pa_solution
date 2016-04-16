@@ -7,7 +7,7 @@ let dict =
   [? Array: lines | lines <- File.lines_of "garbled_email_dictionary.txt" ?]
 
 
-Solution (s: line) : int =
+Solution (s: "%s@\n") : "%d" =
   let len = String.length s in
   let dp = Array.make_matrix (len+1) 5 10000 in
 

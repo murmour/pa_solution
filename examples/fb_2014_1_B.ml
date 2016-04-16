@@ -4,7 +4,7 @@ open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
 
 
-Solution (n, k, c: int) : int =
+Solution (n, k, c: "%d ") : "%d" =
   Enum.reduce min (Enum.init n (fun w ->
     let w = w + 1 in
     let pen = n - w in

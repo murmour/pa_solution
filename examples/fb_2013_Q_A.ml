@@ -4,7 +4,7 @@ open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
 
 
-Solution (input: line) : int =
+Solution (input: "%s@\n") : "%d" =
   input |> String.lowercase
         |> String.to_list
         |> List.filter Char.is_letter

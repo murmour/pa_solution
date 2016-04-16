@@ -15,7 +15,7 @@ let rec bisect pred ltime rtime =
         bisect pred (pivot + 1) rtime
 
 
-Solution (b, n: int) (barbers: array[b] of int) : int =
+Solution (b, n: "%d ") (barbers: array[b] of "%d ") : "%d" =
 
   let check_solution time =
     let processed =

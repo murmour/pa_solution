@@ -3,7 +3,7 @@
 open Batteries (* batteries.forge.ocamlcore.org *)
 
 
-Solution (n: int64) (d, g: int) : string =
+Solution (n, d, g: "%d ") : "%s" =
   let result =
     if g = 100 then
       d = 100
@@ -14,15 +14,14 @@ Solution (n: int64) (d, g: int) : string =
     else if d = 0 then
       g < 100
     else
-      let d = Int64.of_int d in
-      let hun = Int64.of_int 100 in
-      let rec iter_n n =
-        if n = Int64.zero then false else
-        if Int64.rem (Int64.mul n d) hun = Int64.zero then
+      let rec iter n =
+        if n = 0 then
+          false
+        else if (n * d) mod 100 = 0 then
           true
         else
-          iter_n (Int64.pred n)
+          iter (n-1)
       in
-      iter_n n
+      iter n
   in
   if result then "Possible" else "Broken"

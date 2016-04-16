@@ -10,22 +10,22 @@ let count_places base n : int =
       ct
     else
       let ct = ct + 1 in
-      iter (Int64.add acc (Int64.pow base (Int64.of_int ct))) ct
+      iter (acc + (Int.pow base ct)) ct
   in
   iter base 1
 
 
-Solution (l: string) (n: int64) : string =
-  let base = Int64.of_int (String.length l) in
+Solution (l: "%s ") (n: "%d ") : "%s" =
+  let base = String.length l in
   let places = count_places base n in
   let map =
     l |> String.enum
-      |> Enum.mapi (fun i c -> (Int64.of_int (i + 1), c))
+      |> Enum.mapi (fun i c -> (i+1, c))
       |> Map.of_enum
   in
   let n = ref n in
   String.init places (fun place ->
     let place = places - place in
-    let x = Int64.div !n (Int64.pow base (Int64.of_int place)) in
-    n := Int64.sub !n x;
+    let x = !n / (Int.pow base place) in
+    n := !n - x;
     map |> Map.find x)

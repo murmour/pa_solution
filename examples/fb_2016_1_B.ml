@@ -4,7 +4,7 @@ open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
 
 
-Solution (l, n, m, d: int) (times: array[n] of int) : int =
+Solution (l, n, m, d: "%d ") (times: array[n] of "%d ") : "%d" =
 
   (* l -> wq *)
   let wq = ref Set.empty in

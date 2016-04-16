@@ -15,7 +15,8 @@ let check arr fn =
       all [? fn arr.(i).[3-i] | i <- 0--3 ?];
     ]
 
-Solution (arr: array[4] of line) (_: empty) : string =
+
+Solution (arr: array[4] of "%s ") : "%s" =
   if check arr (function 'X' | 'T' -> true | _ -> false) then
     "X won"
   else if check arr (function 'O' | 'T' -> true | _ -> false) then

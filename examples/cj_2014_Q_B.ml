@@ -3,7 +3,7 @@
 open Batteries (* batteries.forge.ocamlcore.org *)
 
 
-Solution (c, f, x: float) : "%.7f" =
+Solution (c, f, x: "%f ") : "%.7f" =
   let max_time = x /. 2.0 in
   let max_farms = int_of_float (ceil x) in
 

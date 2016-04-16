@@ -10,10 +10,8 @@ let rec build_tree g pred node : tree =
   let adj = MultiMap.find node g |> Set.remove pred in
   Tree (adj |> Set.elements |> List.map (build_tree g node))
 
-
 let rec count_nodes (Tree children) : int =
   1 + (children |> List.map count_nodes |> List.fold_left (+) 0)
-
 
 let rec solve_tree (Tree children) : int =
   match children with
@@ -28,13 +26,14 @@ let rec solve_tree (Tree children) : int =
                 let sum = ts |> List.map count_nodes |> List.sum in
                 sum - c1 - c2
 
-
 let build_graph edges =
-  edges |> ListLabels.fold_left ~init:MultiMap.empty ~f:(fun acc (v1, v2) ->
-    acc |> MultiMap.add v1 v2 |> MultiMap.add v2 v1)
+  let m = ref MultiMap.empty in
+  edges |> List.iter (fun (v1, v2) ->
+    m := !m |> MultiMap.add v1 v2 |> MultiMap.add v2 v1);
+  !m
 
 
-Solution (n: int) (edges: list[n-1] of tuple(int, int)) : int =
+Solution (n: "%d ") (edges: list[n-1] of "%d %d ") : "%d" =
   let g = build_graph edges in
   (1--n)
   |> Enum.map (build_tree g 0)

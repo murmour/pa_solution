@@ -1,4 +1,4 @@
-(* Helper library: https://github.com/cakeplus/pa_solution *)
+(* Helper library: https://bitbucket.org/cakeplus/solution *)
 
 open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
@@ -21,9 +21,9 @@ let unify s1 s2 =
     Some (Enum.combine (String.enum s1, String.enum s2)
           |> Enum.map (function
               | ('?', '?') -> 'a'
-              | ('?', b)   -> b
-              | (a  , '?') -> a
-              | (a  , b)   -> if a = b then a else raise Not_found)
+              | ('?', b) -> b
+              | (a, '?') -> a
+              | (a, b) -> if a = b then a else raise Not_found)
           |> String.of_enum)
   with Not_found ->
     None
@@ -32,7 +32,7 @@ let compare_edges (_, s1) (_, s2) =
   -(compare s1 s2)
 
 
-Solution (m: int) (k1: line) (k2: line) : string =
+Solution (m: "%d ") (k1: "%s ") (k2: "%s ") : "%s" =
   let n = String.length k1 in
   let l = n / m in
   let c = m * 2 in
@@ -40,7 +40,7 @@ Solution (m: int) (k1: line) (k2: line) : string =
   (* Adding vertices *)
   let g = Array.make c { label = ""; edges = []; pair = None } in
   for i = 0 to m-1 do
-    g.(i)     <- { label = String.sub k1 (i*l) l; edges = []; pair = None };
+    g.(i) <- { label = String.sub k1 (i*l) l; edges = []; pair = None };
     g.(i + m) <- { label = String.sub k2 (i*l) l; edges = []; pair = None };
   done;
 
@@ -78,8 +78,8 @@ Solution (m: int) (k1: line) (k2: line) : string =
                   if kuhn j2 visited then
                     extend_path i j s));
           false
-
-        with Path_extended -> true
+        with Path_extended ->
+          true
       end
   in
 
@@ -89,19 +89,15 @@ Solution (m: int) (k1: line) (k2: line) : string =
   done;
 
   (* Building the key *)
-  let result =
-    try
-      let b = Buffer.create 100 in
-      for i = 0 to m-1 do
-        match g.(i).pair with
-          | Some (_, s) ->
-              Buffer.add_string b s
-          | None ->
-              raise Not_found
-      done;
-      Some (Buffer.contents b)
-
-    with Not_found -> None
-  in
-
-  result |> Option.default "IMPOSSIBLE"
+  try
+    let b = Buffer.create 100 in
+    for i = 0 to m-1 do
+      match g.(i).pair with
+        | Some (_, s) ->
+            Buffer.add_string b s
+        | None ->
+            raise Not_found
+    done;
+    Buffer.contents b
+  with Not_found ->
+    "IMPOSSIBLE"

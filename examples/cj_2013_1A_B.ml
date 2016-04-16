@@ -17,7 +17,7 @@ let calc_descn arr i =
   iter 0
 
 
-Solution (e, r, n: int) (arr: array[n] of int) : int =
+Solution (e, r, n: "%d ") (arr: array[n] of "%d ") : "%d" =
   let cre = ref e in
   let gain = ref 0 in
   for i = 0 to n-1 do

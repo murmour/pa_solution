@@ -16,7 +16,7 @@ let pow2 =
   LazyList.from (fun () -> let this = !p in p := this * 2; this)
 
 
-Solution (p: "%d/") (q: "%d\n") : string =
+Solution (p: "%d/") (q: "%d\n") : "%s" =
   let (p, q) = simplify (p, q) in
   let base = Int.pow 2 40 in
   if base mod q <> 0 then

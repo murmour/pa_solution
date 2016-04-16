@@ -1,19 +1,18 @@
 (* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
-open Int64.Infix
 
 
-Solution (n, m: int)
-         (x: list[n] of tuple(int64, int))
-         (y: list[m] of tuple(int64, int)) : int64 =
+Solution (n, m: "%d ")
+         (x: list[n] of "%d %d ")
+         (y: list[m] of "%d %d ") : "%d" =
   let x = x |> List.mapi (fun i (v, t) -> (v, t, i)) in
   let y = y |> List.mapi (fun i (v, t) -> (v, t, i)) in
   let h = Hashtbl.create 1000 in
 
   let rec recurse = function
     | (_, []) | ([], _) ->
-        0L
+        0
     | ((x, xt, xi) :: xs, (y, yt, yi) :: ys) ->
         match Hashtbl.find_option h (x, xt, xi, y, yt, yi) with
           | Some result ->
@@ -28,9 +27,8 @@ Solution (n, m: int)
                   else
                     x + (recurse (xs, ys))
                 else
-                  max
-                    (recurse (xs, (y, yt, yi) :: ys))
-                    (recurse ((x, xt, xi) :: xs, ys))
+                  max (recurse (xs, (y, yt, yi) :: ys))
+                      (recurse ((x, xt, xi) :: xs, ys))
               in
               Hashtbl.add h (x, xt, xi, y, yt, yi) result;
               result

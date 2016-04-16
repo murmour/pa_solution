@@ -3,7 +3,7 @@
 open Batteries (* batteries.forge.ocamlcore.org *)
 
 
-Solution (n: int) (vines: list[n] of tuple(int, int)) (d: int) : string =
+Solution (n: "%d ") (vines: list[n] of "%d %d ") (d: "%d ") : "%s" =
   let vines = Array.of_list (vines @ [ (d, 0) ]) in
   let len = Array.length vines in
   let sol = Array.make len None in

@@ -74,7 +74,7 @@ let extend mat_orig n m =
   arr
 
 
-Solution (n, m: int) (input: array[n] of string) : int =
+Solution (n, m: "%d ") (input: array[n] of "%s ") : "%d" =
   let arr = scan_input input n m in
   let filled = fill arr n m in
   let extended = extend filled n m in

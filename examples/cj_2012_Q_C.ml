@@ -7,7 +7,7 @@ let powers =
   Array.of_enum [? Int.pow 10 i | i <- 1--9 ?]
 
 
-Solution (a, b: int) : int =
+Solution (a, b: "%d ") : "%d" =
   let n = String.length (string_of_int a) in
 
   let rotate r by =

@@ -11,7 +11,7 @@ let choose_s s =
   Array.findi (function | Some a -> a <= s | _ -> false)
 
 
-Solution (n: int) (levels: list[n] of tuple(int, int)) : string =
+Solution (n: "%d ") (levels: list[n] of "%d %d ") : "%s" =
   let size = 1000 in
   let l1 = Array.make size None in
   let l2 = Array.make size None in

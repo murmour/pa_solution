@@ -9,7 +9,7 @@ let get_prob_list l =
   l |> List.map (fun p2 -> p := !p *. p2; !p) |> List.rev
 
 
-Solution (a, b: int) (probs: list[a] of float) : float =
+Solution (a, b: "%d ") (probs: list[a] of "%f ") : "%f" =
   let to_retype = float_of_int (b + 1) in
 
   let expectation n succ_p =

@@ -20,5 +20,5 @@ let mapping =
   (c1, c2) |> Enum.combine |> Map.of_enum
 
 
-Solution (input: line) : string =
+Solution (input: "%s@\n") : "%s" =
   input |> String.map (fun c -> Map.find c mapping)

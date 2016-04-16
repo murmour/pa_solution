@@ -25,7 +25,7 @@ let memoize fn =
   fn'
 
 
-Solution (t: int) (ps, pr, pi, pu, pw, pd, pl: float) : float =
+Solution (t: "%d ") (ps, pr, pi, pu, pw, pd, pl: "%f ") : "%f" =
   (pi, 0, 0) |> memoize (fun calc (p, w, l) ->
     if w = t then
       1.0

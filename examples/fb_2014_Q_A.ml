@@ -28,7 +28,7 @@ let check_square arr n (x1, y1) (x2, y2) =
     |> not
 
 
-Solution (n: int) (arr: array[n] of line) : string =
+Solution (n: "%d ") (arr: array[n] of "%s ") : "%s" =
   (function | true -> "YES" | false -> "NO")
   (match (find_first arr n, find_last arr n) with
     | (Some pos1, Some pos2) ->

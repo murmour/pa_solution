@@ -23,7 +23,7 @@ let sum l =
   l |> ListLabels.fold_left ~init:0 ~f:(+)
 
 
-Solution (c, d, v: int) (dens: list[d] of int) : int =
+Solution (c, d, v: "%d ") (dens: list[d] of "%d ") : "%d" =
   let new_dens = ref (Set.of_list dens) in
   for i = 1 to v do
     let sums = get_perms (times c (Set.elements !new_dens)) |> List.map sum in

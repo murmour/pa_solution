@@ -5,7 +5,6 @@ open Batteries
 
 
 let modulo = 1_000_000_007
-let modulo64 = 1_000_000_007L
 
 
 let combs n k =
@@ -17,16 +16,14 @@ let combs n k =
   arr
 
 
-Solution (n: int) (k: int) (arr: array[n] of int) : int64 =
+Solution (n: "%d ") (k: "%d ") (arr: array[n] of "%d ") : "%d" =
   Array.sort compare arr;
   let c = combs n (k-1) in
-
   let rec iter i acc =
     if i = n then
       acc
     else
-      let acc = Int64.add acc (Int64.of_int (arr.(i) * c.(i))) in
-      iter (i+1) (Int64.modulo acc modulo64)
+      let acc = acc + (arr.(i) * c.(i)) in
+      iter (i+1) (acc mod modulo)
   in
-
-  iter k (Int64.of_int arr.(k-1))
+  iter k arr.(k-1)

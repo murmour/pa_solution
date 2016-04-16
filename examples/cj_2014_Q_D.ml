@@ -20,7 +20,7 @@ let rec solve_dwar = function
         solve_dwar (x :: xs, ys)
 
 
-Solution (n: int) (n_blocks, k_blocks: list[n] of float) : tuple(int, int) =
+Solution (n: "%d ") (n_blocks, k_blocks: list[n] of "%f ") : "%d %d" =
   let n_blocks = List.sort compare n_blocks |> List.rev in
   let k_blocks = List.sort compare k_blocks |> List.rev in
   (solve_dwar (n_blocks, k_blocks), solve_war (n_blocks, k_blocks))

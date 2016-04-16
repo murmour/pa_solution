@@ -7,7 +7,7 @@ let count_bits (patt: int) : int =
   Enum.sum [? (patt lsr bit) land 1 | bit <- 0--40 ?]
 
 
-Solution (n, _: int) (flow, req: list[n] of string) : string =
+Solution (n, _: "%d ") (flow, req: list[n] of "%s ") : "%s" =
   let read_mask s = int_of_string ("0b" ^ s) in
   let flow = flow |> List.map read_mask in
   let req = req |> List.map read_mask in

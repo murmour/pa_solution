@@ -23,7 +23,7 @@ let primacity: int -> int =
   fun i -> sieve.(i)
 
 
-Solution (a, b, k: int) : int =
+Solution (a, b, k: "%d ") : "%d" =
   let count = ref 0 in
   for i = a to b do
     if primacity i = k then

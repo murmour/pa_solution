@@ -3,7 +3,7 @@
 open Batteries (* batteries.forge.ocamlcore.org *)
 
 
-Solution (a, n: int) (arr: array[n] of int) : int =
+Solution (a, n: "%d ") (arr: array[n] of "%d ") : "%d" =
   Array.sort compare arr;
   let len = Array.length arr in
 

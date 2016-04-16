@@ -10,8 +10,7 @@ let calc_cost n len ct =
   modulo (ct * (modulo ((2 * n - len + 1) * len / 2)))
 
 
-Solution (n, m: int) (arr: list[m] of tuple(int, int, int)) : int =
-
+Solution (n, m: "%d ") (arr: list[m] of "%d %d %d ") : "%d" =
   let events = RefList.empty () in
   arr |> List.iter (fun (o, e, p) ->
     RefList.add events (`Start, o, p);

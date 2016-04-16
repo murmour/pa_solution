@@ -37,11 +37,9 @@ let solve_guy f rest sum =
   solve_range 0.0 1.0 0
 
 
-Solution (n: int) (pts: list[n] of int) : string =
+Solution (n: "%d ") (pts: list[n] of "%d ") : list[n] of "%.7f " =
   let sum = float_of_int (List.sum pts) in
   let pts = pts |> List.map float_of_int in
   pts
   |> context_map (fun f rest -> solve_guy f rest sum)
   |> List.map (( *.) 100.0)
-  |> List.map (Printf.sprintf "%.7f")
-  |> String.concat " "

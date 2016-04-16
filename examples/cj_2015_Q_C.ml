@@ -61,7 +61,7 @@ let rec reduces_to_ijk sign = function
       reduces_to_ijk sign' (q3 :: rest)
 
 
-Solution (l, x: int) (spelling: list[l] of char) : string =
+Solution (l, x: "%d ") (spelling: list[l] of "%c ") : "%s" =
   let quats = spelling |> List.map
     (function 'i' -> I | 'j' -> J | 'k' -> K | _ -> assert false)
   in

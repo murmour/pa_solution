@@ -15,7 +15,7 @@ let update_state s c =
     `Hall
 
 
-Solution (n: int) (row1: line) (row2: line) : int =
+Solution (n: "%d ") (row1: "%s ") (row2: "%s ") : "%d" =
   let count = ref 0 in
   let row1 = row1 ^ "X" in
   let row2 = row2 ^ "X" in

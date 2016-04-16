@@ -6,7 +6,7 @@ open Batteries (* batteries.forge.ocamlcore.org *)
 let base = 1_000_000_000
 
 
-Solution (n: int) (peaks: array[n-1] of int) : string =
+Solution (n: "%d ") (peaks: array[n-1] of "%d ") : "%s" =
   let n = n - 1 in
   let peaks = peaks |> Array.map pred in
   let sol = Array.make (n + 1) None in

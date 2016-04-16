@@ -4,7 +4,7 @@ open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
 
 
-Solution (n: int) (difficulties: array[n] of int) : int =
+Solution (n: "%d ") (difficulties: array[n] of "%d ") : "%d" =
   let count = ref 0 in
   let rec iter i pos last =
     if pos = 4 then

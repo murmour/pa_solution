@@ -66,7 +66,7 @@ let nice_chains chains : bool =
   |> is_unique
 
 
-Solution (n: int) (sets: list[n] of string) : int =
+Solution (n: "%d ") (sets: list[n] of "%s ") : "%d" =
   let chains = merge_chains sets in
   if not (nice_chains chains) then 0 else
     sets |> List.filter_map (fun set ->

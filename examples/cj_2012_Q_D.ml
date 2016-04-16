@@ -28,7 +28,7 @@ let slope (y1, x1) (y2, x2) =
   simplify (y1 - y2, x1 - x2)
 
 
-Solution (h, w, d: int) (map: array[h] of string) : int =
+Solution (h, w, d: "%d ") (map: array[h] of "%s ") : "%d" =
   let h = h-2 and w = w-2 in
   let mat = Array.make_matrix h w `Empty in
   let center = ref (0, 0) in

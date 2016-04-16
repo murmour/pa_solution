@@ -43,7 +43,7 @@ let rec check n = function
   | _ -> false
 
 
-Solution (input: line) : string =
+Solution (input: "%s@\n") : "%s" =
   let result =
     input |> String.to_list
           |> List.map scan_symbol

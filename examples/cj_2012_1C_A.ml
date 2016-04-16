@@ -1,26 +1,24 @@
-(* Helper library: https://github.com/cakeplus/pa_solution *)
+(* Helper library: https://bitbucket.org/cakeplus/solution *)
 
 open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
 
-module G = Graph.Pack.Digraph
-  (* ocamlgraph.lri.fr *)
 
-
-Solution (n: int) (classes: list[n] of let m: int in list[m] of int) : string =
-  let g = G.create () in
-  let v = Array.init n (fun i -> G.V.create (i + 1)) in
-
-  classes |> List.iteri (fun i c ->
-    c |> List.iter (fun child ->
-      G.add_edge g v.(i) v.(child - 1)));
+Solution (n: "%d ") (g: list[n] of let m: "%d " in list[m] of "%d ") : "%s" =
+  let h = Hashtbl.create 1010 in
+  g |> List.iteri (fun i c ->
+    c |> List.iter (fun inh ->
+      Hashtbl.add h (i+1) inh));
 
   Return.label (fun lab ->
-    let rec traverse v =
-      if G.Mark.get v = 1 then
-        Return.return lab "Yes";
-      G.Mark.set v 1;
-      G.iter_succ traverse g v
-    in
-    g |> G.iter_vertex (fun v -> G.Mark.clear g; traverse v);
+    g |> List.iteri (fun i c ->
+      let m = Array.create 1010 false in
+      let rec recurse c2 =
+        if m.(c2) then
+          Return.return lab "Yes"
+        else
+          (m.(c2) <- true;
+           Hashtbl.find_all h c2 |> List.iter recurse)
+      in
+      recurse (i+1));
     "No")

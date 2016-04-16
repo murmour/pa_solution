@@ -14,7 +14,7 @@ let rec get_words keys = function
         keys |> List.map (fun k -> k :: word)))
 
 
-Solution (k, l, s: int) (keys: list[k] of char) (target: list[l] of char) : "%.6f" =
+Solution (k, l, s: "%d ") (keys: list[k] of "%c ") (target: list[l] of "%c ") : "%.6f" =
   let target' = String.of_list target in
   let words = get_words keys s in
   let words' = words |> List.map String.of_list in

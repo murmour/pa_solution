@@ -4,7 +4,7 @@ open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
 
 
-let edit_distance s1 s2 =
+let edit_distance s1 s2 : int =
   let len1 = String.length s1 in
   let len2 = String.length s2 in
   let rec iter i =
@@ -20,7 +20,7 @@ let edit_distance s1 s2 =
   iter 0
 
 
-Solution (n, k: int) (words: array[n] of string) : int =
+Solution (n, k: "%d ") (words: array[n] of "%s ") : "%d" =
   Array.sort compare words;
 
   let dp = Array.make_matrix n k max_int in

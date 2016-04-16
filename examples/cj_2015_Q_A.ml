@@ -3,7 +3,7 @@
 open Batteries (* batteries.forge.ocamlcore.org *)
 
 
-Solution (smax: int) (shy_c: array[smax+1] of char) : int =
+Solution (smax: "%d ") (shy_c: array[smax+1] of "%c ") : "%d" =
   let shy_i = shy_c |> Array.map (fun c -> Char.code c - Char.code '0') in
   let standing = ref 0 in
   let friends = ref 0 in

@@ -13,12 +13,6 @@ type info =
   }
 
 
-let mk_info () =
-  {
-    corners = Array.make 6 0;
-    edges = Array.make 6 0;
-  }
-
 let print_result s =
   match s with
     | None ->
@@ -37,24 +31,30 @@ let merge_info a b =
 
 let is_ring chk =
   let rec rotate rhs = function
-    | [] -> None
-    | None :: xs -> Some (xs @ List.rev rhs)
-    | x :: xs -> rotate (x :: rhs) xs in
-
+    | [] ->
+        None
+    | None :: xs ->
+        Some (xs @ List.rev rhs)
+    | x :: xs ->
+        rotate (x :: rhs) xs
+  in
   let rec find_ring chk = function
-    | [] -> false
-    | None :: xs -> find_ring chk xs
+    | [] ->
+        false
+    | None :: xs ->
+        find_ring chk xs
     | Some a :: xs ->
         if List.mem a chk then true else
-          find_ring (a :: chk) (List.drop_while ((=) (Some a)) xs) in
-
+          find_ring (a :: chk) (List.drop_while ((=) (Some a)) xs)
+  in
   match rotate [] chk with
-    | None -> false
+    | None ->
+        false
     | Some xs ->
         find_ring [] xs
 
 
-Solution (s, m: int) (stones: list[m] of tuple(int, int)) : string =
+Solution (s, m: "%d ") (stones: list[m] of "%d %d ") : "%s" =
   let bound = s*2 - 1 in
   let v = Array.make_matrix (bound+1) (bound+1) None in
   let h = Hashtbl.create 1000 in
@@ -100,15 +100,24 @@ Solution (s, m: int) (stones: list[m] of tuple(int, int)) : string =
   in
 
   let process_move move (x, y) =
-    let info = mk_info () in
+    let info =
+      {
+        corners = Array.make 6 0;
+        edges = Array.make 6 0;
+      }
+    in
 
     (* Собираем информацию об узле *)
-    (match is_corner (x, y) with
-      | Some i -> info.corners.(i) <- 1
-      | None ->
-          match is_edge (x, y) with
-            | Some i -> info.edges.(i) <- 1
-            | None -> ());
+    begin
+      match is_corner (x, y) with
+        | Some i ->
+            info.corners.(i) <- 1
+        | None ->
+            match is_edge (x, y) with
+              | Some i ->
+                  info.edges.(i) <- 1
+              | None -> ()
+    end;
 
     let crown = get_crown (x, y) in
     match List.filter_map identity crown with

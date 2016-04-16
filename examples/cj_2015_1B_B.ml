@@ -9,7 +9,7 @@ let solve_linear c n =
   max 0 (unhappy * 2 - 1 + c mod 2)
 
 
-Solution (r, c, n: int) : int =
+Solution (r, c, n: "%d ") : "%d" =
   if r = 1 then
     solve_linear c n
   else if c = 1 then
