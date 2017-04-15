@@ -1,7 +1,7 @@
 
 (* Pa_solution, a DSL for solving programming contest problems
    -----------------------------------------------------------------------------
-   Copyright (C) 2013-2016, Max Mouratov (mmouratov@gmail.com)
+   Copyright (C) 2013-2017, Max Mouratov (mmouratov@gmail.com)
 
    License:
      This library is free software; you can redistribute it and/or
@@ -28,13 +28,6 @@ open Camlp4.PreCast
 
 
 type spec =
-  | Int
-  | Int64
-  | Float
-  | String
-  | Char
-  | Line
-  | Empty
   | List of Ast.expr * spec         (* list[expr] of spec *)
   | Array of Ast.expr * spec        (* array[expr] of spec *)
   | Tuple of spec list              (* (spec, spec, ...) *)
@@ -54,10 +47,6 @@ let gensym =
     incr id;
     Printf.sprintf "_#%d" !id
 
-let identity =
-  let x = gensym () in
-  <:expr< fun $lid:(x)$ -> $lid:(x)$ >>
-
 
 (* Reader
    -------------------------------------------------------------------------- *)
@@ -67,22 +56,6 @@ let in_ch =
 
 let rec compile_reader (s: spec) : Ast.expr =
   match s with
-    | Int ->
-        compile_reader (Format ("%d ", 1))
-    | Int64 ->
-        compile_reader (Format ("%Ld ", 1))
-    | Float ->
-        compile_reader (Format ("%f ", 1))
-    | String ->
-        compile_reader (Format ("%s ", 1))
-    | Char ->
-        compile_reader (Format ("%c ", 1))
-    | Line ->
-        compile_reader (Format ("%[^\n]\n", 1))
-
-    | Empty ->
-        <:expr< try let _ = $(compile_reader Line)$ in () with _ -> () >>
-
     | List (size, s) ->
         <:expr< Q.Array.to_list $(compile_reader (Array (size, s)))$ >>
 
@@ -114,7 +87,7 @@ let rec compile_reader (s: spec) : Ast.expr =
     | Format (spec, 0) ->
         <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(spec)$ >>
     | Format (spec, 1) ->
-        <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(spec)$ $(identity)$ >>
+        <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(spec)$ (fun x -> x) >>
     | Format (spec, holes) ->
         let ids = Array.to_list @@ Array.init holes (fun i -> gensym ()) in
         let args = ids |> List.map (fun id -> <:expr< $lid:(id)$ >>) in
@@ -135,43 +108,12 @@ let rec compile_reader (s: spec) : Ast.expr =
 let out_ch =
   gensym ()
 
-let print_endline =
-  <:expr< Q.Printf.fprintf $lid:(out_ch)$ "\n" >>
-
 let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
   match s with
-    | Int ->
-        compile_writer (Format ("%d ", 1)) v
-    | Int64 ->
-        compile_writer (Format ("%Ld ", 1)) v
-    | Float ->
-        compile_writer (Format ("%f ", 1)) v
-    | String ->
-        compile_writer (Format ("%s ", 1)) v
-    | Char ->
-        compile_writer (Format ("%c ", 1)) v
-    | Line ->
-        compile_writer (Format ("%s\n", 1)) v
-
-    | Empty ->
-        <:expr< let () = $(v)$ in $(print_endline)$ >>
-
     | List (size, s) ->
         let id = gensym () in
         let writer = compile_writer s <:expr< $lid:(id)$ >> in
         <:expr< Q.List.iter (fun $lid:(id)$ -> $(writer)$) $(v)$ >>
-
-    | Array (size, Line) ->
-        let id = gensym () in
-        <:expr<
-          for $lid:(id)$ = 0 to Array.length $(v)$ - 1 do
-            if $lid:(id)$ = 0 then
-              $(print_endline)$ else ();
-            $(compile_writer String <:expr< $(v)$.($lid:(id)$) >>)$;
-            if $lid:(id)$ < Array.length $(v)$ - 1 then
-              $(print_endline)$ else ()
-          done
-        >>
 
     | Array (size, s) ->
         let id = gensym () in
@@ -196,10 +138,13 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
     | Let (let_id, s1, s2) ->
         compile_writer s2 v
 
-    | Expr _ -> v
+    | Expr _ ->
+        failwith "Arbitrary expressions are not allowed in solution result"
 
     | Format (spec, 0) ->
-        <:expr< let () = $(v)$ in Q.Printf.fprintf $lid:(out_ch)$ $str:(spec)$ >>
+        <:expr<
+          let () = $(v)$ in Q.Printf.fprintf $lid:(out_ch)$ $str:(spec)$
+        >>
     | Format (spec, 1) ->
         <:expr< Q.Printf.fprintf $lid:(out_ch)$ $str:(spec)$ $(v)$ >>
     | Format (spec, holes) ->
@@ -219,11 +164,10 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
         >>
 
 
-(* The compiler
+(* Compiler
    -------------------------------------------------------------------------- *)
 
 let compile_solution in_spec out_spec (body: Ast.expr) : Ast.str_item =
-
   let rec wrap_body = function
     | (patt, spec) :: xs ->
         <:expr<
@@ -233,11 +177,10 @@ let compile_solution in_spec out_spec (body: Ast.expr) : Ast.str_item =
     | [] ->
         compile_writer out_spec body
   in
-
   <:str_item<
     let $lid:(in_ch)$ = Q.Scanf.Scanning.open_in (Q.Sys.argv.(1) ^ ".in") in
     let $lid:(out_ch)$ = Q.Pervasives.open_out (Q.Sys.argv.(1) ^ ".out") in
-    for _i = 1 to Q.Scanf.bscanf $lid:(in_ch)$ "%d " $(identity)$ do
+    for _i = 1 to Q.Scanf.bscanf $lid:(in_ch)$ "%d " (fun x -> x) do
       Q.Printf.printf "Solving case %d\n%!" _i;
       Q.Printf.fprintf $lid:(out_ch)$ "Case #%d: " _i;
       $(wrap_body in_spec)$;
@@ -272,7 +215,7 @@ EXTEND Gram
             | "array" ->
                 List.fold_right (fun idx acc -> Array (idx, acc)) specs t
             | _ ->
-                failwith (Printf.sprintf "Unknown type: %s" id))
+                failwith (Printf.sprintf "Unknown container type: %s" id))
 
       | "tuple"; "("; type_list = LIST0 type_ SEP ","; ")" ->
           Tuple type_list
@@ -280,23 +223,13 @@ EXTEND Gram
       | "let"; binds = LIST1 let_binding SEP ","; "in"; t = type_ ->
           List.fold_right (fun (patt, t) a -> Let (patt, t, a)) binds t
 
-      | id = a_LIDENT ->
-          (match id with
-            | "int" -> Int
-            | "int64" -> Int64
-            | "float" -> Float
-            | "string" -> String
-            | "char" -> Char
-            | "line" -> Line
-            | "empty" -> Empty
-            | id -> Expr <:expr< $lid:(id)$ >>)
-
       | s = a_STRING ->
           let holes = ref 0 in
           s |> String.iter (fun c -> if c = '%' then incr holes);
           Format (s, !holes)
 
-      | e = expr -> Expr e
+      | e = expr ->
+          Expr e
     ]
   ];
 
@@ -310,7 +243,7 @@ EXTEND Gram
                 [ (patt_list, type_) ]);
 
       | type_ = type_ ->
-        [ (<:patt< _ >>, type_) ];
+          [ (<:patt< _ >>, type_) ];
     ]
   ];
 
