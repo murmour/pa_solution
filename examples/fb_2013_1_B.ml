@@ -1,4 +1,4 @@
-(* Helper library: https://bitbucket.org/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
@@ -32,7 +32,7 @@ let compare_edges (_, s1) (_, s2) =
   -(compare s1 s2)
 
 
-Solution (m: "%d ") (k1: "%s ") (k2: "%s ") : "%s" =
+Solution (m: "%d ") (k1, k2: "%s ") : "%s" =
   let n = String.length k1 in
   let l = n / m in
   let c = m * 2 in

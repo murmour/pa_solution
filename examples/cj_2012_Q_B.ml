@@ -1,4 +1,4 @@
-(* Helper library: https://github.com/cakeplus/solution *)
+(* Helper library: https://github.com/cakeplus/pa_solution *)
 
 open Batteries (* batteries.forge.ocamlcore.org *)
 
