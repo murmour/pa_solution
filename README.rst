@@ -25,12 +25,11 @@ round. This could be the starting point of the implementation:
 
 .. sourcecode:: ocaml
 
-  Solution (k, n: int) (keys: array[k] of int)
+  Solution (k, n: "%d ") (keys: array[k] of "%d ")
            (chests: array[n] of
-              let t: int in
-              let k: int in
-              let c: array[k] of int in (t, k, c)) : tuple(float, int) =
-
+              let t: "%d " in
+              let k: "%d " in
+              let c: array[k] of "%d " in (t, k, c)) : "%f %d" =
     (* Solution logic: an expression that returns (float * int) *)
 
 Here, we have defined a solution that first reads two integers `n` and `k`, then
@@ -57,54 +56,68 @@ Complete BNF-style grammar of the `Solution` construct, where keywords are
 quoted and `...` is a comma-separated list. `<topform>` is the entry point::
 
   <topform> ::= "Solution" <input>* ":" <output> "=" <body>
-  <input> ::= "(" <patt>... ":" <type> ")"
+  <input> ::= "(" <patt>... ":" <type> ")" | <type>
   <output> ::= <type>
   <body> ::= <expr>
-  <type> ::= <prim_type> | <let> | <tuple> | <list> | <array> | <expr>
-  <prim_type> ::= "int" | "int64" | "float" | "string" | "char" | "line" | "empty"
+  <type> ::= <format> | <let> | <tuple> | <list> | <array> | <expr>
   <let> ::= "let" (<patt> ":" <type>)... "in" <type>
   <tuple> ::= "tuple" "(" <type>... ")"
   <list> ::= "list" "[" <expr>... "]" "of" <type>
   <array> ::= "array" "[" <expr>... "]" "of" <type>
   <expr> ::= OCaml expression
   <patt> ::= OCaml pattern
+  <format> ::= OCaml format specifier
+
+`<format>` is a formatting specification that uses the same syntax as functions
+from the standard `Printf` module (for outputs, it is the same as `Scanf`). If
+the specification string has no "holes", then the type of the corresponding
+input/output value is `unit`. If there is more than one hole, then the type is a
+tuple.
+
+.. sourcecode:: ocaml
+
+  "%d %f "
+  (* Read an (int * float) tuple *)
+
+  "%s@\n"
+  (* Read a string that is terminated by a newline (that is, a line of input) *)
 
 `<array>` allows to read several values into an OCaml array of a specified size
 (the size of each dimension is defined by an arbitrary expression). Example:
 
 .. sourcecode:: ocaml
 
-  array[3, 3] of int
+  array[3, 3] of "%d "
   (* Read a 3x3 matrix of integers *)
 
 `<list>` is the same as `<array>` but for lists:
 
 .. sourcecode:: ocaml
 
-  list[3] of array[4] of int
+  list[3] of array[4] of "%d "
   (* Read a 3-element list of 4-element integer arrays *)
 
-`<let>` binds a read value into a variable that can be referenced in subsequent declarations. Example:
+`<let>` binds a read value into a variable that can be referenced in subsequent
+declarations. Example:
 
 .. sourcecode:: ocaml
 
-  let n: int in array[n] of float
+  let n: "%d " in array[n] of "%f "
   (* Read n, then read an array of floats of size n *)
 
 `<tuple>` reads a tuple of values:
 
 .. sourcecode:: ocaml
 
-  let n: int in list[n] of tuple(int, float)
+  let n: "%d " in list[n] of tuple("%d ", "%f ")
   (* Read an n-sized list of (int * float) tuples *)
 
-`<int>`, `<int64>`, `<char>` and `<float>` correspond to the primitive OCaml types.
+For brevity, this can be rewritten as follows, without an explicit `tuple`:
 
-`<string>` is a whitespace-delimited word (same as `%s` in `Scanf`).
+.. sourcecode:: ocaml
 
-`<line>` is a string of arbitrary characters ending with a newline character (but excluding it).
-
-`<empty>` is a newline character (corresponds to type `unit`).
+  let n: "%d " in list[n] of "%d %f "
+  (* Read an n-sized list of (int * float) tuples *)
 
 
 .. _`problem D`: https://code.google.com/codejam/contest/2270488/dashboard#s=p3
