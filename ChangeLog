@@ -1,3 +1,13 @@
+2017-05-02  Max Mouratov  <mmouratov@gmail.com>
+
+	Version 0.7
+
+	* New: Arbitrary Printf/Scanf specifications for inputs/outputs.
+	* Breaking: Syntactic support for several primitive types is dropped,
+	as this is fulfilled by the new syntax of format specifications.
+	* New: It is now possible to drop the pattern part of an input.
+
+
 2016-01-18  Max Mouratov  <mmouratov@gmail.com>
 
 	Version 0.6
