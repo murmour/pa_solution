@@ -1,5 +1,5 @@
 Name: pa_solution
-Version: 0.6
+Version: 0.7
 Synopsis: A DSL for solving programming contest problems
 Authors: Max Mouratov
 Maintainers: Max Mouratov
@@ -30,4 +30,4 @@ Library pa_solution
 SourceRepository this
   Type: git
   Location: https://github.com/cakeplus/pa_solution
-  Tag: 0.6
+  Tag: 0.7
