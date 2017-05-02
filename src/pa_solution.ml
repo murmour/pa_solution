@@ -63,18 +63,18 @@ let rec compile_reader (s: spec) : Ast.expr =
         <:expr< Q.Array.init $(size)$ (fun _ -> $(compile_reader s)$) >>
 
     | Tuple specs ->
-        let l = specs |> List.map (fun s -> (gensym (), s)) in
-        let rec build = function
-          | (id, s) :: xs ->
+        let rec build ids = function
+          | x :: xs ->
+              let id = gensym () in
               <:expr<
                 let $lid:(id)$ = $(compile_reader s)$ in
-                $(build xs)$
+                $(build (id :: ids) xs)$
               >>
           | [] ->
-              let es = l |> List.map (fun (id, r) -> <:expr< $lid:(id)$ >>) in
-              <:expr< $tup:(Ast.exCom_of_list es)$ >>
+              let items = ids |> List.map (fun id -> <:expr< $lid:(id)$ >>) in
+              <:expr< $tup:(Ast.exCom_of_list (List.rev items))$ >>
         in
-        build l
+        build [] specs
 
     | Let (patt, s1, s2) ->
         <:expr<
@@ -88,18 +88,16 @@ let rec compile_reader (s: spec) : Ast.expr =
         <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(spec)$ >>
     | Format (spec, 1) ->
         <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(spec)$ (fun x -> x) >>
-    | Format (spec, holes) ->
-        let ids = Array.to_list @@ Array.init holes (fun i -> gensym ()) in
-        let args = ids |> List.map (fun id -> <:expr< $lid:(id)$ >>) in
-        let body = <:expr< $tup:(Ast.exCom_of_list args)$ >> in
-        let rec build_fn ids =
-          match ids with
-            | [] ->
-                body
-            | x :: xs ->
-                <:expr< fun $lid:(x)$ -> $(build_fn xs)$ >>
+    | Format (spec, n) ->
+        let rec build ids n =
+          if n = 0 then
+            let args = ids |> List.map (fun id -> <:expr< $lid:(id)$ >>) in
+            <:expr< $tup:(Ast.exCom_of_list (List.rev args))$ >>
+          else
+            let id = gensym () in
+            <:expr< fun $lid:(id)$ -> $(build (id :: ids) (n-1))$ >>
         in
-        <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(spec)$ $(build_fn ids)$ >>
+        <:expr< Q.Scanf.bscanf $lid:(in_ch)$ $str:(spec)$ $(build [] n)$ >>
 
 
 (* Writer
@@ -148,19 +146,17 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
     | Format (spec, 1) ->
         <:expr< Q.Printf.fprintf $lid:(out_ch)$ $str:(spec)$ $(v)$ >>
     | Format (spec, holes) ->
-        let rec append_args head args =
-          match args with
-            | [] ->
-                head
-            | x :: xs ->
-                append_args <:expr< $(head)$ $lid:(x)$ >> xs
-        in
         let ids = Array.to_list @@ Array.init holes (fun i -> gensym ()) in
+        let printer =
+          let e = ref <:expr< Q.Printf.fprintf $lid:(out_ch)$ $str:(spec)$ >> in
+          ids |> List.iter (fun arg ->
+            e := <:expr< $(!e)$ $lid:(arg)$ >>);
+          !e
+        in
         let patts = ids |> List.map (fun id -> <:patt< $lid:(id)$ >>) in
-        let printer = <:expr< Q.Printf.fprintf $lid:(out_ch)$ $str:(spec)$ >> in
         <:expr<
           let $tup:(Ast.paCom_of_list patts)$ = $(v)$ in
-          $(append_args printer ids)$
+          $(printer)$
         >>
 
 
@@ -168,22 +164,16 @@ let rec compile_writer (s: spec) (v: Ast.expr) : Ast.expr =
    -------------------------------------------------------------------------- *)
 
 let compile_solution in_spec out_spec (body: Ast.expr) : Ast.str_item =
-  let rec wrap_body = function
-    | (patt, spec) :: xs ->
-        <:expr<
-          let $(patt)$ = $(compile_reader spec)$ in
-          $(wrap_body xs)$
-        >>
-    | [] ->
-        compile_writer out_spec body
-  in
+  let body' = ref (compile_writer out_spec body) in
+  in_spec |> List.rev |> List.iter (fun (patt, spec) ->
+    body' := <:expr< let $(patt)$ = $(compile_reader spec)$ in $(!body')$ >>);
   <:str_item<
     let $lid:(in_ch)$ = Q.Scanf.Scanning.open_in (Q.Sys.argv.(1) ^ ".in") in
     let $lid:(out_ch)$ = Q.Pervasives.open_out (Q.Sys.argv.(1) ^ ".out") in
     for _i = 1 to Q.Scanf.bscanf $lid:(in_ch)$ "%d " (fun x -> x) do
       Q.Printf.printf "Solving case %d\n%!" _i;
       Q.Printf.fprintf $lid:(out_ch)$ "Case #%d: " _i;
-      $(wrap_body in_spec)$;
+      $(!body')$;
       Q.Printf.fprintf $lid:(out_ch)$ "\n"
     done
   >>
