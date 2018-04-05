@@ -5,24 +5,18 @@ open Batteries
 
 
 Solution (n: "%d ") (weights: list[n] of "%d ") : "%d" =
-  let rec iter d =
-    match Deque.rear d with
-      | None ->
-          0
-      | Some (d', x) ->
-          let rec subiter d total =
-            if total >= 50 then
-              Some d
-            else match Deque.front d with
-              | None ->
-                  None
-              | Some (_, d') ->
-                  subiter d' (total+x)
-          in
-          match subiter d' x with
-            | None ->
-                0
-            | Some d'' ->
-                1 + iter d''
-  in
-  iter (weights |> List.sort compare |> Deque.of_list)
+  let d = ref (weights |> List.sort compare |> Deque.of_list) in
+  let trips = ref 0 in
+  while not (Deque.is_empty !d) do
+    Deque.rear !d |> Option.may (fun (d', top) ->
+      d := d';
+      let total = ref top in
+      while !total < 50 && not (Deque.is_empty !d) do
+        Deque.front !d |> Option.may (fun (_, d') ->
+          d := d';
+          total := !total + top)
+      done;
+      if !total >= 50 then
+        incr trips)
+  done;
+  !trips

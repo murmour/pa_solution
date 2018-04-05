@@ -4,9 +4,6 @@ open Batteries
   (* https://github.com/ocaml-batteries-team/batteries-included *)
 
 
-let pi =
-  3.1415926535897932384626433832795029
-
 let rot (x, y) rad =
   let x' = x*.(cos rad) -. y*.(sin rad) in
   let y' = x*.(sin rad) +. y*.(cos rad) in
@@ -15,7 +12,7 @@ let rot (x, y) rad =
 let vec (ax, ay) (bx, by) =
   (bx -. ax, by -. ay)
 
-let cross ((ax, ay)) ((bx, by)) : float =
+let cross (ax, ay) (bx, by) : float =
   (ax*.by) -. (ay*.bx)
 
 let distance (ax, ay) (bx, by) : float =
@@ -30,7 +27,7 @@ Solution (p, x, y: "%d ") : "%s" =
   if distance o v > 50.0 then
     "white"
   else
-    let rad = ((pi *. 2.0) /. 100.0) *. float_of_int p in
+    let rad = ((Float.pi *. 2.0) /. 100.0) *. float_of_int p in
     let a = (50.0, 100.0) in
     let b =
       let (x, y) = rot (0.0, 50.0) (-.rad) in

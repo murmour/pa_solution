@@ -13,15 +13,15 @@ let parse_spell s : (int * int * int) =
 let estimate_spell h (x, y, z) : float =
   let limit = x*y in
   let dp = Array.make_matrix (x+1) (limit+1) 0.0 in
-  let p = 1.0 /. float_of_int y in
+  let trans_p = 1.0 /. float_of_int y in
 
   dp.(0).(0) <- 1.0;
   for i = 1 to x do
-    dp.(i) <- Array.make (limit+1) 0.0;
     for j = 0 to limit do
+      let inc = dp.(i-1).(j) *. trans_p in
       for k = 1 to y do
         if j+k <= limit then
-          dp.(i).(j+k) <- dp.(i).(j+k) +. (p *. dp.(i-1).(j))
+          dp.(i).(j+k) <- dp.(i).(j+k) +. inc
       done
     done
   done;
